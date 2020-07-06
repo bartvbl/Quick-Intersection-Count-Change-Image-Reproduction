@@ -226,8 +226,8 @@ int main(int argc, const char** argv) {
             outJson["clutterValues"].push_back(clutterValues.content[item]);
         }
 
-        std::cout << "Writing output file.." << std::endl;
-        std::string outFilePath = outDir.value() + "/" + getCurrentDateTimeString() + "_" + std::to_string((int)resultFileContents["seed"]) + ".json";
+        std::string outFilePath = outDir.value() + "/" + getCurrentDateTimeString() + "_" + std::to_string((size_t)resultFileContents["seed"]) + ".json";
+        std::cout << "Writing output file to " << outFilePath << std::endl;
         std::ofstream outFile(outFilePath);
         outFile << outJson.dump(4) << std::endl;
         outFile.close();
@@ -241,7 +241,9 @@ int main(int argc, const char** argv) {
             SpinImage::gpu::freeMesh(deviceMesh);
         }
 
-        std::cout << "Done." << std::endl;
+        std::cout << std::endl;
+        std::cout << "Done. The dump file containing estimated clutter fractions has been written to:" << std::endl;
+        std::cout << std::endl << "    " << outFilePath << std::endl;
     }
 
 }

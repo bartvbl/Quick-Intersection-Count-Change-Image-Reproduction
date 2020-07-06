@@ -90,7 +90,7 @@ void dumpResultsFile(
         std::vector<size_t> uniqueVertexCounts,
         std::vector<size_t> spinImageSampleCounts,
         GPUMetaData gpuMetaData) {
-    std::cout << std::endl << "Dumping results file.." << std::endl;
+    std::cout << std::endl << "Dumping results file to " << outputFile << ".." << std::endl;
 
 	std::minstd_rand0 generator{seed};
 
@@ -348,6 +348,8 @@ void dumpRawSearchResultFile(
         std::vector<SpinImage::array<unsigned int>> rawSISearchResults,
         std::vector<SpinImage::array<unsigned int>> rawSCSearchResults,
         size_t seed) {
+
+    std::cout << "Dumping raw search results to " << outputFile << ".." << std::endl;
 
     json outJson;
 

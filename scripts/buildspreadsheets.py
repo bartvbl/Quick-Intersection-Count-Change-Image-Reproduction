@@ -85,7 +85,9 @@ inputDirectories = {
 }
 
 # The location where the master spreadsheet should be written to
-outfile = 'output/master_spreadsheet.xls'
+outfile = '../output/master_spreadsheet.xls'
+numCountsToIncludeInRawHistogramSpreadsheet = 100
+histogramSpreadsheetLocation = '../output/raw_top100_histograms.xls'
 
 # Map of methods contained in the output files
 methods = {
@@ -620,7 +622,7 @@ horizontal_ticks_labels = [("%.1f" % x) for x in np.arange(0,1.1,0.2)]
 
 for figureIndex, method in enumerate(methods):
     plot = plt.figure(figureIndex + 1)
-    plt.title('')
+    plt.title(method.upper())
     plt.ylabel('rank')
     plt.xlabel('clutter percentage')
     image = plt.imshow(histograms[method], extent=extent, cmap='nipy_spectral', norm=normalisation)
@@ -634,6 +636,9 @@ for figureIndex, method in enumerate(methods):
 
     plot.show()
 
+print()
+print('Heatmap generation complete, press enter to dump spreadsheets.')
+print('(which will also close the heatmap windows)')
 input()
 
 # -- Dump to spreadsheet --
@@ -810,4 +815,48 @@ for seedIndex, seed in enumerate(seedList + ['dummy entry for final row']):
     totalTriangleCountSheet.write(seedIndex, currentColumn, ' ')
 
 book.save(outfile)
+
+
+print('Main spreadheet dump complete.')
+print()
+print('Dumping histogram spreadsheet..')
+
+book = xlwt.Workbook(encoding="utf-8")
+sheets = {}
+# Create sheets
+for method in methods:
+    sheets[method] = {}
+for method in methods:
+    sheets[method] = book.add_sheet(str(method.upper()))
+
+for method in methods:
+    sheets[method].write(0, 0, 'index')
+    sheets[method].write(0, 1, 'seed')
+    for seedIndex, seed in enumerate(seedList):
+        sheets[method].write(seedIndex + 1, 0, seedIndex + 1)
+        sheets[method].write(seedIndex + 1, 1, seed)
+        entry = resultSet['results'][methods[method]['namePrefixInJSONFile']][seed]
+        for i in range(0, numCountsToIncludeInRawHistogramSpreadsheet):
+            if str(sampleCountIndex) in entry[histogramsString]:
+                if '0' in entry[histogramsString][str(sampleCountIndex)]:
+                    percentageAtPlace0 = float(entry[histogramsString][str(sampleCountIndex)]['0']) / float(
+                        totalImageCount)
+                totalImageCountInTop10 = sum(
+                    [entry[histogramsString][str(sampleCountIndex)][str(x)] for x in range(0, 10) if
+                     str(x) in entry[histogramsString][str(sampleCountIndex)]])
+            else:
+                if '0' in entry[histogramsString][indexNameString]:
+                    percentageAtPlace0 = float(entry[histogramsString][indexNameString]['0']) / float(
+                        totalImageCount)
+                totalImageCountInTop10 = sum(
+                    [entry[histogramsString][indexNameString][str(x)] for x in range(0, 10) if
+                     str(x) in entry[histogramsString][indexNameString]])
+
+    for i in range(0, numCountsToIncludeInRawHistogramSpreadsheet):
+        sheets[method].write(0, i + 2, i)
+
+
+
+book.save(histogramSpreadsheetLocation)
+
 print('Complete.')
