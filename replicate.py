@@ -88,6 +88,12 @@ def compileProject():
         if choice == 2:
             return
 
+def runSpreadsheetBuilder():
+    if ask_for_confirmation('The spreadsheet construction script will consume around 16GB of RAM.\nYou should close any applications to ensure you do not run out of memory.\nContinue?'):
+        print()
+        run_command_line_command('python3 buildspreadsheets.py', 'scripts/')
+
+
 activeDescriptors = ['rici', 'si', '3dsc']
 activeObjectCounts = ['1', '5', '10']
 spinImageSupportAngle = 180
@@ -96,14 +102,16 @@ seedFileLocation = 'res/seeds_used_for_clutterbox_experiments.txt'
 with open(seedFileLocation) as seedFile:
     random_seeds = [line.strip() for line in seedFile]
 
+clutterEstimationDirectory = 'input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_withearlyexit/output'
+
 
 
 
 def executeClutterboxExperiment(randomSeed):
-    run_command_line_command('./clutterbox '
+    run_command_line_command('src/clutterbox/build/clutterbox '
                              '--box-size=1 '
-                             '--output-directory=../../../output/ '
-                             '--source-directory=../../../input/SHREC17/ '
+                             '--output-directory=output/clutterbox_results/ '
+                             '--source-directory=input/SHREC17/ '
                              '--object-counts=' + ','.join(activeObjectCounts) + ' '
                              '--override-total-object-count=10 '
                              '--descriptors=' + ','.join(activeDescriptors) + ' '
@@ -113,8 +121,7 @@ def executeClutterboxExperiment(randomSeed):
                              '--spin-image-support-angle-degrees=' + str(spinImageSupportAngle) + ' '
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
-                             '--dump-raw-search-results',
-                             'src/clutterbox/build')
+                             '--dump-raw-search-results')
 
 def configureActiveDescriptors():
     while True:
@@ -183,7 +190,7 @@ def configureSpinImageAngle():
 
 def configureGPU():
     global gpuID
-    run_command_line_command('./clutterbox --list-gpus', 'src/clutterbox/build')
+    run_command_line_command('src/clutterbox/build/clutterbox --list-gpus')
     print()
     gpuID = input('Enter the ID of the GPU to use (usually 0): ')
 
@@ -198,7 +205,7 @@ def runClutterbox():
             "Configure object counts (currently active: " + ', '.join(activeObjectCounts) + ")",
             "Configure Spin Image support angle (currently set to " + str(spinImageSupportAngle) + ")",
             "Configure GPU (use if system has more than one, currently set to GPU " + str(gpuID) + ")",
-            "back"], title='------------ Run Clutterbox Experiment -----------')
+            "back"], title='------------ Run Clutterbox Experiment ------------')
         choice = run_menu.show()
 
         if choice == 0:
@@ -229,6 +236,39 @@ def runClutterbox():
         if choice == 7:
             return
 
+def executeClutterEstimator(indexToCompute):
+    print('Computing clutter estimate file for file index', indexToCompute)
+    run_command_line_command('src/clutterbox/build/clutterEstimator '
+                             '--result-dump-dir=' + clutterEstimationDirectory + ' '
+                             '--object-dir=input/SHREC17/ '
+                             '--output-dir=output/estimated_clutter '
+                             '--compute-single-index=' + str(indexToCompute) + ' '
+                             '--force-gpu=' + str(gpuID) + ' '
+                             '--samples-per-triangle=30 ')
+    print()
+
+def runClutterEstimation():
+    fileCount = len([name for name in os.listdir(clutterEstimationDirectory)
+                     if os.path.isfile(os.path.join(clutterEstimationDirectory, name))])
+    while True:
+        clutterEstimation_menu = TerminalMenu([
+            "Run Clutter Estimator with random file index",
+            "Run Clutter Estimator with manually specified file index",
+            "Configure GPU (use if system has more than one, currently set to GPU " + str(gpuID) + ")",
+            "back"], title='------------ Run Clutter Estimator ------------')
+        choice = clutterEstimation_menu.show()
+        if choice == 0:
+            index = random.randint(0, fileCount)
+            executeClutterEstimator(index)
+        if choice == 1:
+            index = str(input('Specify index of file to process (must be an integer between 0 and ' + str(fileCount) + '): '))
+            executeClutterEstimator(index)
+        if choice == 2:
+            configureGPU()
+        if choice == 3:
+            activeObjectCounts.sort()
+            return
+
 def runProjectionBenchmark():
     if ask_for_confirmation('This benchmark will consume around 30GB of RAM. You should close any applications to ensure you do not run out. Continue?'):
         print()
@@ -245,9 +285,9 @@ def runMainMenu():
         "1. Install dependencies",
         "2. Download datasets",
         "3. Compile project",
-        "4. Run Clutterbox experiment",
-        "5. Run clutter fraction estimation",
-        "6. Compile author generated results into spreadsheets",
+        "4. Compile author generated results into spreadsheets",
+        "5. Run Clutterbox experiment",
+        "6. Run Clutter fraction estimation",
         "7. Run projection algorithm benchmark (Table 1)",
         "8. exit"], title='---------------------- Main Menu ----------------------')
 
@@ -261,21 +301,26 @@ def runMainMenu():
         if choice == 2:
             compileProject()
         if choice == 3:
+            runSpreadsheetBuilder()
+        if choice == 4:
             runClutterbox()
+        if choice == 5:
+            runClutterEstimation()
         if choice == 6:
             runProjectionBenchmark()
         if choice == 7:
             return
 
 def runIntroSequence():
+
+    print('Initializing..')
     print()
     print('Greetings!')
     print()
     print('This script is intended to reproduce various figures in an interactive')
     print('(and hopefully convenient) manner.')
     print()
-    print('However, a set of bash scripts is provided in the "scriptsrc" folder')
-    print('that will allow you to circumvent parts of this script, if desired.')
+    print('It is recommended you refer to the included PDF manual for instructions')
     print()
     runMainMenu()
 
