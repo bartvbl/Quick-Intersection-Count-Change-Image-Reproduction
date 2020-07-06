@@ -1,0 +1,15 @@
+3048759171 - Nice table
+	-> Nice table
+3461184303 - Greatest fall in performance from 1 object to 10 objects
+	-> Police van
+3056361425 - Lowest fall in performance from 1 object to 10 objects
+	-> Desk chair
+1919129218 - Worst performance with 1 object
+	-> Bookshelf
+REMOVED - 369371938 - Best performance with 1 object
+3617347629 - Nearly best performance with 1 object
+	-> Lounge chair
+3098714219 - Performance increased from 5 to 10 objects
+	-> Headphones
+3500854400 - Closest to the average drop in performance between 1 to 10 objects
+	-> Park bench

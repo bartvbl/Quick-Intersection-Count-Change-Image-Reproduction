@@ -64,17 +64,23 @@ def compileProject():
         if choice == 2:
             return
 
+activeDescriptors = ['rici', 'si', '3dsc']
+activeObjectCounts = ['1', '5', '10']
+spinImageSupportAngle = 180
+gpuID = 0
+
+
 def executeClutterboxExperiment():
     run_command_line_command('clutterbox '
                              '--box-size=1 '
                              '--source-directory=../../../input/SHREC17/ '
-                             '--object-counts=1,5,10 '
+                             '--object-counts=' + ','.join(activeObjectCounts) + ' '
                              '--override-total-object-count=10 '
-                             '--descriptors=rici,si,3dsc '
+                             '--descriptors=' + ','.join(activeDescriptors) + ' '
                              '--support-radius=0.3 '
-                             '--force-gpu=0 '
+                             '--force-gpu=' + str(gpuID) + ' '
                              '--force-seed=0 '
-                             '--spin-image-support-angle-degrees=180 '
+                             '--spin-image-support-angle-degrees=' + str(spinImageSupportAngle) + ' '
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
                              '--dump-raw-search-results')
@@ -84,10 +90,11 @@ def runClutterbox():
         run_menu = TerminalMenu([
             "Run seed drawn from seed list at random",
             "Run seed with specific index in seed list",
-            "Configure descriptors to test",
-            "Configure object counts",
-            "Configure Spin Image support angle",
-            "Configure GPU (use if system has more than one)",
+            "Run manually entered seed",
+            "Configure descriptors to test (currently active: " + ', '.join(activeDescriptors) + ")",
+            "Configure object counts (currently active: " + ', '.join(activeObjectCounts) + ")",
+            "Configure Spin Image support angle (currently set to " + str(spinImageSupportAngle) + ")",
+            "Configure GPU (use if system has more than one, currently set to GPU " + str(gpuID) + ")",
             "back"], title='------------ Run Clutterbox Experiment -----------')
         choice = run_menu.show()
 
@@ -97,7 +104,7 @@ def runClutterbox():
         if choice == 1:
             run_command_line_command('sudo apt install nvidia-cuda-toolkit nvidia-cuda-dev')
             print()
-        if choice == 2:
+        if choice == 6:
             return
 
 def runMainMenu():
@@ -106,9 +113,10 @@ def runMainMenu():
         "2. Download datasets",
         "3. Compile project",
         "4. Run Clutterbox experiment",
-        "5. Compile author generated results into spreadsheets",
-        "6. Run projection algorithm benchmark (Table 1)",
-        "7. exit"], title='---------------------- Main Menu ----------------------')
+        "5. Run clutter fraction estimation",
+        "6. Compile author generated results into spreadsheets",
+        "7. Run projection algorithm benchmark (Table 1)",
+        "8. exit"], title='---------------------- Main Menu ----------------------')
 
     while True:
         choice = main_menu.show()
@@ -121,7 +129,7 @@ def runMainMenu():
             compileProject()
         if choice == 3:
             runClutterbox()
-        if choice == 6:
+        if choice == 7:
             return
 
 def runIntroSequence():
