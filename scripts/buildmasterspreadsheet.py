@@ -57,31 +57,31 @@ def is3dscResultValid(fileCreationTime, resultJson):
 #       HEID: DGX-2 machine, contains 16 equivalent V100 cards. Used for time sensitive tests.
 inputDirectories = {
     # RICI, measurements for matching and computation times (only tested on 4 added clutter objects)
-    '../HEIDRUNS/output_qsifix_v4_noearlyexit/output': ('QSI, No early exit, 5 objects', 'HEID'),
-    '../HEIDRUNS/output_qsifix_v4_withearlyexit/output': ('QSI, Early exit, 5 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_noearlyexit/output': ('QSI, No early exit, 5 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_withearlyexit/output': ('QSI, Early exit, 5 objects', 'HEID'),
     # RICI, measurements for matching performance
-    '../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output': ('Failed jobs from IDUN run', 'HEID'),
-    '../IDUNRUNS/output_lotsofobjects_v4': ('primary QSI IDUN run', 'IDUN'),
-    '../HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output': ('re-run of 5 object QSI results that were missing raw files', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output': ('Failed jobs from IDUN run', 'HEID'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4': ('primary QSI IDUN run', 'IDUN'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output': ('re-run of 5 object QSI results that were missing raw files', 'HEID'),
 
     # SI, execution times and machine performance
-    '../HEIDRUNS/output_qsifix_v4_lotsofobjects_10_objects_only/output': ('180 support angle, 10 objects', 'HEID'),
-    '../HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output': ('180 support angle, 5 objects', 'HEID'),
-    '../HEIDRUNS/output_qsifix_v4_180deg_si_missing/output': ('180 support angle, 10 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_10_objects_only/output': ('180 support angle, 10 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output': ('180 support angle, 5 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_180deg_si_missing/output': ('180 support angle, 10 objects', 'HEID'),
         # NOTE: 5 object sequence DOES NOT contribute to time measurements (the bit further down with lots of split() and merge() calls verifies this)
-    '../IDUNRUNS/output_mainchart_si_v4_15': ('180 support angle, 1 & 5 objects', 'IDUN'),
-    '../IDUNRUNS/output_mainchart_si_v4_10': ('180 support angle, 10 objects', 'IDUN'),
-    '../IDUNRUNS/output_mainchart_si_v4_1': ('180 support angle, 1 object', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15': ('180 support angle, 1 & 5 objects', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_10': ('180 support angle, 10 objects', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_1': ('180 support angle, 1 object', 'IDUN'),
     # SI, testing matching performance of 60 degree support angle
-    '../IDUNRUNS/output_smallsupportangle_lotsofobjects': ('60 support angle, primary', 'IDUN'),
-    '../IDUNRUNS/output_qsifix_smallsupportangle_rerun': ('60 support angle, secondary', 'IDUN'),
-    '../IDUNRUNS/output_supportanglechart60_si_v4_1': ('60 support angle, 1 object', 'IDUN'),
-    '../IDUNRUNS/output_supportanglechart60_si_v4_5': ('60 support angle, 5 objects', 'IDUN'),
-    '../HEIDRUNS/output_qsifix_v4_60deg_si_missing/output/': ('60 support angle, 10 objects', 'HEID'),
-    '../HEIDRUNS/output_qsifix_si_v4_60deg_5objects_missing/output/': ('60 support angle, 5 objects', 'HEID'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_smallsupportangle_lotsofobjects': ('60 support angle, primary', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_qsifix_smallsupportangle_rerun': ('60 support angle, secondary', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_supportanglechart60_si_v4_1': ('60 support angle, 1 object', 'IDUN'),
+    '../input/results_computed_by_authors/IDUNRUNS/output_supportanglechart60_si_v4_5': ('60 support angle, 5 objects', 'IDUN'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_60deg_si_missing/output/': ('60 support angle, 10 objects', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_si_v4_60deg_5objects_missing/output/': ('60 support angle, 5 objects', 'HEID'),
 
     # 3DSC, execution time and matching performance are both measured
-    '../HEIDRUNS/run1_3dsc_main/output/': ('3DSC', 'HEID'),
+    '../input/results_computed_by_authors/HEIDRUNS/run1_3dsc_main/output/': ('3DSC', 'HEID'),
 }
 
 # The location where the master spreadsheet should be written to
@@ -118,13 +118,15 @@ methods = {
 heatmapSize = 256
 
 rawInputDirectories = {
-    'QSI': ['../HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output/raw', '../IDUNRUNS/output_lotsofobjects_v4/raw'],
-    'SI': ['../HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output/raw', '../IDUNRUNS/output_mainchart_si_v4_15/raw'],
-    '3DSC': ['../HEIDRUNS/run1_3dsc_main/output/raw'],
+    'QSI': ['../input/results_computed_by_authors/HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output/raw', 
+            '../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4/raw'],
+    'SI': ['../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output/raw', 
+           '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15/raw'],
+    '3DSC': ['../input/results_computed_by_authors/HEIDRUNS/run1_3dsc_main/output/raw'],
 }
 rawInputObjectCount = 5
 
-clutterFileDirectories = ['../clutter/output_5objects/output']
+clutterFileDirectories = ['../input/clutter_estimated_by_authors/clutter/']
 
 
 
@@ -133,7 +135,6 @@ removeSeedsWithMissingEntries = True
 
 # Cut down the result set to a specific number of entries
 resultSetSizeLimit = 1500
-#resultSetSizeLimit = 500
 enableResultSetSizeLimit = True
 
 
@@ -179,10 +180,6 @@ def extractExperimentSettings(loadedJson):
             if methods[method]['namePrefixInJSONFile'] + 'histograms' in loadedJson:
                 descriptors.append(methods[method]['nameInJSONFile'])
         settings['descriptors'] = descriptors
-    if 'quicciDistanceFunction' in loadedJson:
-        settings['quicciDistanceFunction'] = loadedJson['quicciDistanceFunction']
-    else:
-        settings['quicciDistanceFunction'] = 'clutterResistant_old'
     settings['version'] = loadedJson['version']
     return settings
 
@@ -422,67 +419,65 @@ def merge(directory1, directory2, newdirectoryName, newDirectoryClusterName):
     return additionCount
 
 # Small hack, but silences a warning that does not apply here
-loadedResults['../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output']['settings']['overrideObjectCount'] = 10
+loadedResults['../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output']['settings']['overrideObjectCount'] = 10
 
 print('\nRestructuring datasets..\n')
-split('../IDUNRUNS/output_smallsupportangle_lotsofobjects')
-split('../IDUNRUNS/output_qsifix_smallsupportangle_rerun')
-split('../IDUNRUNS/output_mainchart_si_v4_15')
-split('../IDUNRUNS/output_lotsofobjects_v4')
-split('../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output')
+split('../input/results_computed_by_authors/IDUNRUNS/output_smallsupportangle_lotsofobjects')
+split('../input/results_computed_by_authors/IDUNRUNS/output_qsifix_smallsupportangle_rerun')
+split('../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15')
+split('../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4')
+split('../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output')
 print()
 
 # QSI 1 object
-merge('../IDUNRUNS/output_lotsofobjects_v4 (1 objects)', '../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (1 objects)',
+merge('../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4 (1 objects)', '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (1 objects)',
       'QSI, 1 object', 'HEID + IDUN')
 
 # QSI 5 objects
-merge('../HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output', '../IDUNRUNS/output_lotsofobjects_v4 (5 objects)', 'QSI primary intermediate', 'HEID + IDUN')
-merge('QSI primary intermediate', '../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (5 objects)',
+merge('../input/results_computed_by_authors/HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output', '../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4 (5 objects)', 'QSI primary intermediate', 'HEID + IDUN')
+merge('QSI primary intermediate', '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (5 objects)',
       'QSI, 5 objects', 'HEID + IDUN')
 
 # QSI 10 objects
-merge('../IDUNRUNS/output_lotsofobjects_v4 (10 objects)', '../HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (10 objects)',
+merge('../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4 (10 objects)', '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_idun_failed/output (10 objects)',
       'QSI, 10 objects', 'HEID + IDUN')
 
 # SI 180 degrees, 1 object
-merge('../IDUNRUNS/output_mainchart_si_v4_1', '../IDUNRUNS/output_mainchart_si_v4_15 (1 objects)',
+merge('../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_1', '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15 (1 objects)',
       'SI 180 degrees, 1 object', 'IDUN')
 
 # SI 180 degrees, 5 objects
-additionCount = merge('../HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output',
-                      '../IDUNRUNS/output_mainchart_si_v4_15 (5 objects)', 'SI 180 degrees, 5 objects', 'HEID')
+additionCount = merge('../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output',
+                      '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15 (5 objects)', 'SI 180 degrees, 5 objects', 'HEID')
 # this merge is mainly to remove the dataset from the input batch. We ultimately want the HEIDRUNS results exclusively because
 # we use these results to compare runtimes
 assert (additionCount == 0)
 
 # SI 180 degrees, 10 objects
-merge('../HEIDRUNS/output_qsifix_v4_lotsofobjects_10_objects_only/output', '../IDUNRUNS/output_mainchart_si_v4_10',
+merge('../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_10_objects_only/output', '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_10',
       'SI 180 degrees, 10 objects', 'HEID + IDUN')
-merge('SI 180 degrees, 10 objects', '../HEIDRUNS/output_qsifix_v4_180deg_si_missing/output',
+merge('SI 180 degrees, 10 objects', '../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_180deg_si_missing/output',
       'SI 180 degrees, 10 objects', 'HEID + IDUN')
 
 # SI 60 degrees, 1 object
-merge('../IDUNRUNS/output_supportanglechart60_si_v4_1',
-      '../IDUNRUNS/output_smallsupportangle_lotsofobjects (1 objects)', 'SI 60 degrees, 1 object intermediate', 'IDUN')
-merge('SI 60 degrees, 1 object intermediate', '../IDUNRUNS/output_qsifix_smallsupportangle_rerun (1 objects)',
+merge('../input/results_computed_by_authors/IDUNRUNS/output_supportanglechart60_si_v4_1',
+      '../input/results_computed_by_authors/IDUNRUNS/output_smallsupportangle_lotsofobjects (1 objects)', 'SI 60 degrees, 1 object intermediate', 'IDUN')
+merge('SI 60 degrees, 1 object intermediate', '../input/results_computed_by_authors/IDUNRUNS/output_qsifix_smallsupportangle_rerun (1 objects)',
       'SI 60 degrees, 1 object', 'IDUN')
 
 # SI 60 degrees, 5 objects
-merge('../HEIDRUNS/output_qsifix_si_v4_60deg_5objects_missing/output/', '../IDUNRUNS/output_supportanglechart60_si_v4_5', 'SI 60 degrees, 5 objects, intermediate', 'HEID + IDUN')
+merge('../input/results_computed_by_authors/HEIDRUNS/output_qsifix_si_v4_60deg_5objects_missing/output/', '../input/results_computed_by_authors/IDUNRUNS/output_supportanglechart60_si_v4_5', 'SI 60 degrees, 5 objects, intermediate', 'HEID + IDUN')
 merge('SI 60 degrees, 5 objects, intermediate',
-      '../IDUNRUNS/output_smallsupportangle_lotsofobjects (5 objects)', 'SI 60 degrees, 5 objects', 'HEID + IDUN')
+      '../input/results_computed_by_authors/IDUNRUNS/output_smallsupportangle_lotsofobjects (5 objects)', 'SI 60 degrees, 5 objects', 'HEID + IDUN')
 
 # SO 60 degrees, 10 objects
-merge('../HEIDRUNS/output_qsifix_v4_60deg_si_missing/output/',
-      '../IDUNRUNS/output_smallsupportangle_lotsofobjects (10 objects)', 'SI 60 deg 10 objects intermediate',
+merge('../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_60deg_si_missing/output/',
+      '../input/results_computed_by_authors/IDUNRUNS/output_smallsupportangle_lotsofobjects (10 objects)', 'SI 60 deg 10 objects intermediate',
       'HEID + IDUN')
-merge('SI 60 deg 10 objects intermediate', '../IDUNRUNS/output_qsifix_smallsupportangle_rerun (10 objects)',
+merge('SI 60 deg 10 objects intermediate', '../input/results_computed_by_authors/IDUNRUNS/output_qsifix_smallsupportangle_rerun (10 objects)',
       'SI 60 degrees, 10 objects', 'HEID + IDUN')
 
 print()
-split('../HEIDRUNS/run1_3dsc_main/output/')
-split('../HEIDRUNS/run2_quicci_main/output/')
 
 print('\nProcessing..\n')
 
