@@ -1,1 +1,0 @@
-sudo apt install nvidia-cuda-toolkit nvidia-cuda-dev 
