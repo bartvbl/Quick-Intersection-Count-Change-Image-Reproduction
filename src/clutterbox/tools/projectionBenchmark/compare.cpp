@@ -126,7 +126,7 @@ int main(int argc, const char** argv) {
     std::cout << "\tPCL duration: " << duration.count() << std::endl;
 
 
-    std::cout << "Testing my method.." << std::endl;
+    std::cout << "Testing method presented in paper.." << std::endl;
 
     auto startMine = std::chrono::steady_clock::now();
 
@@ -162,12 +162,23 @@ int main(int argc, const char** argv) {
     auto myDuration = std::chrono::duration_cast<std::chrono::milliseconds>
             (std::chrono::steady_clock::now() - startMine);
 
-    std::cout << "\tMy duration: " << myDuration.count() << std::endl;
+    std::cout << "\tMethod presented in paper duration: " << myDuration.count() << std::endl;
+    std::cout << std::endl;
+    std::cout << "Press enter to show a comparison between the first 100 results computed by both methods." << std::endl;
+    std::cout << "These should be identical." << std::endl;
+    std::cout << "    Left side: Results produced by PCL implementation" << std::endl;
+    std::cout << "    Right side: Results produced by our implementation" << std::endl;
+    std::cout << std::endl;
+    getchar();
 
     // Uncomment to compare results
     for(unsigned long long i = 0; i < 100; i++) {
     	std::cout << "(" << transformed_pcl[i][0] << ", " << transformed_pcl[i][1] << ")\tvs\t(" << transformed_mine[i][0] << ", " << transformed_mine[i][1] << ")" << std::endl;
     }
+
+    std::cout << std::endl;
+    std::cout << "Press enter to continue.." << std::endl;
+    getchar();
 
 	return 0;
 }
