@@ -1,5 +1,6 @@
 import os
 import subprocess
+import random
 
 from simple_term_menu import TerminalMenu
 
@@ -91,25 +92,29 @@ activeDescriptors = ['rici', 'si', '3dsc']
 activeObjectCounts = ['1', '5', '10']
 spinImageSupportAngle = 180
 gpuID = 0
+seedFileLocation = 'res/seeds_used_for_clutterbox_experiments.txt'
+with open(seedFileLocation) as seedFile:
+    random_seeds = [line.strip() for line in seedFile]
 
 
 
 
-
-def executeClutterboxExperiment():
-    run_command_line_command('clutterbox '
+def executeClutterboxExperiment(randomSeed):
+    run_command_line_command('./clutterbox '
                              '--box-size=1 '
+                             '--output-directory=../../../output/ '
                              '--source-directory=../../../input/SHREC17/ '
                              '--object-counts=' + ','.join(activeObjectCounts) + ' '
                              '--override-total-object-count=10 '
                              '--descriptors=' + ','.join(activeDescriptors) + ' '
                              '--support-radius=0.3 '
                              '--force-gpu=' + str(gpuID) + ' '
-                             '--force-seed=0 '
+                             '--force-seed=' + str(randomSeed) + ' '
                              '--spin-image-support-angle-degrees=' + str(spinImageSupportAngle) + ' '
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
-                             '--dump-raw-search-results')
+                             '--dump-raw-search-results',
+                             'src/clutterbox/build')
 
 def configureActiveDescriptors():
     while True:
@@ -176,14 +181,19 @@ def configureSpinImageAngle():
     if choice == 1:
         spinImageSupportAngle = 60
 
+def configureGPU():
+    global gpuID
+    run_command_line_command('./clutterbox --list-gpus', 'src/clutterbox/build')
+    print()
+    gpuID = input('Enter the ID of the GPU to use (usually 0): ')
 
 
 def runClutterbox():
     while True:
         run_menu = TerminalMenu([
-            "Run seed drawn from seed list at random",
-            "Run seed with specific index in seed list",
-            "Run manually entered seed",
+            "Run experiment with random seed drawn from seed list at random",
+            "Run experiment with random seed with specific index in seed list",
+            "Run experiment with manually entered random seed",
             "Configure descriptors to test (currently active: " + ', '.join(activeDescriptors) + ")",
             "Configure object counts (currently active: " + ', '.join(activeObjectCounts) + ")",
             "Configure Spin Image support angle (currently set to " + str(spinImageSupportAngle) + ")",
@@ -192,13 +202,17 @@ def runClutterbox():
         choice = run_menu.show()
 
         if choice == 0:
-            executeClutterboxExperiment()
+            chosenSeed = random.choice(random_seeds)
+            executeClutterboxExperiment(chosenSeed)
             print()
         if choice == 1:
-            executeClutterboxExperiment()
+            chosenSeedIndex = input('Specify the index of the random seed to use (must be between 0 and ' + str(len(random_seeds)) + '): ')
+            chosenSeed = random_seeds[int(chosenSeedIndex)]
+            executeClutterboxExperiment(chosenSeed)
             print()
         if choice == 2:
-            executeClutterboxExperiment()
+            chosenSeed = input('Manually specify random seed to use (must be an integer!): ')
+            executeClutterboxExperiment(chosenSeed)
             print()
         if choice == 3:
             configureActiveDescriptors()
@@ -208,6 +222,9 @@ def runClutterbox():
             print()
         if choice == 5:
             configureSpinImageAngle()
+            print()
+        if choice == 6:
+            configureGPU()
             print()
         if choice == 7:
             return
