@@ -95,6 +95,8 @@ int main(int argc, const char** argv) {
     std::cout << " (found " << resultFileList.size() << " files)" << std::endl;
     std::cout << std::endl;
 
+    std::sort(resultFileList.begin(), resultFileList.end());
+
 
     std::vector<std::string> parts;
     unsigned int firstIndex = (computeSingleIndex.value() != -1) ? computeSingleIndex.value() : startIndex.value();

@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import random
@@ -102,8 +103,9 @@ seedFileLocation = 'res/seeds_used_for_clutterbox_experiments.txt'
 with open(seedFileLocation) as seedFile:
     random_seeds = [line.strip() for line in seedFile]
 
-clutterEstimationDirectory = 'input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_withearlyexit/output'
-
+clutterSourceDumpFileDirectory = 'input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_withearlyexit/output'
+estimatedClutterDirectory = 'input/clutter_estimated_by_authors/clutter/'
+clutterFileMap = None
 
 
 
@@ -237,19 +239,59 @@ def runClutterbox():
             return
 
 def executeClutterEstimator(indexToCompute):
+    global clutterFileMap
+    if clutterFileMap is None:
+        print()
+        print('In order to be able to show which files must be compared to those generated,')
+        print('the directory of clutter estimate files computed by the authors needs to be scanned.')
+        print('This should only take a few seconds.')
+        clutterFileMap = {}
+
+        clutterfiles = [name for name in os.listdir(estimatedClutterDirectory)
+                     if os.path.isfile(os.path.join(estimatedClutterDirectory, name))]
+        for fileindex, clutterfile in enumerate(clutterfiles):
+            print('Processed', fileindex+1, 'of', len(clutterfiles), end='\r', flush=True)
+            with open(os.path.join(estimatedClutterDirectory, clutterfile), 'r') as openFile:
+                # Read JSON file
+                try:
+                    clutterFileContents = json.loads(openFile.read())
+                    seed = clutterFileContents['sourceFile'].split('.')[0].split('_')[2]
+                    clutterFileMap[seed] = os.path.join(estimatedClutterDirectory, clutterfile)
+                except Exception as e:
+                    print('FAILED TO READ FILE: ' + str(clutterfile))
+                    print(e)
+                    continue
+        print()
+        print()
+
+    dumpfiles = [name for name in os.listdir(clutterSourceDumpFileDirectory)
+                 if os.path.isfile(os.path.join(clutterSourceDumpFileDirectory, name))]
+    dumpfiles.sort()
+
     print('Computing clutter estimate file for file index', indexToCompute)
     run_command_line_command('src/clutterbox/build/clutterEstimator '
-                             '--result-dump-dir=' + clutterEstimationDirectory + ' '
+                             '--result-dump-dir=' + clutterSourceDumpFileDirectory + ' '
                              '--object-dir=input/SHREC17/ '
                              '--output-dir=output/estimated_clutter '
                              '--compute-single-index=' + str(indexToCompute) + ' '
                              '--force-gpu=' + str(gpuID) + ' '
                              '--samples-per-triangle=30 ')
     print()
+    print('You should compare this produced file to:')
+    print()
+    print()
+    dumpFilePath = os.path.join(clutterSourceDumpFileDirectory, dumpfiles[indexToCompute])
+    try:
+        with open(dumpFilePath, 'r') as openFile:
+            dumpFileContents = json.loads(openFile.read())
+            dumpFileSeed = dumpFileContents['seed']
+            print('   ', clutterFileMap[str(dumpFileSeed)])
+    except Exception as e:
+        print('FAILED TO READ FILE: ' + dumpFilePath, e)
 
 def runClutterEstimation():
-    fileCount = len([name for name in os.listdir(clutterEstimationDirectory)
-                     if os.path.isfile(os.path.join(clutterEstimationDirectory, name))])
+    fileCount = len([name for name in os.listdir(clutterSourceDumpFileDirectory)
+                     if os.path.isfile(os.path.join(clutterSourceDumpFileDirectory, name))])
     while True:
         clutterEstimation_menu = TerminalMenu([
             "Run Clutter Estimator with random file index",
@@ -312,8 +354,6 @@ def runMainMenu():
             return
 
 def runIntroSequence():
-
-    print('Initializing..')
     print()
     print('Greetings!')
     print()
