@@ -6,8 +6,7 @@
 	-> Desk chair
 1919129218 - Worst performance with 1 object
 	-> Bookshelf
-REMOVED - 369371938 - Best performance with 1 object
-3617347629 - Nearly best performance with 1 object
+3617347629 - Best performance with 1 object
 	-> Lounge chair
 3098714219 - Performance increased from 5 to 10 objects
 	-> Headphones

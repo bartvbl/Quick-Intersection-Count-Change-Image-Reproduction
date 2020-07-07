@@ -87,7 +87,7 @@ inputDirectories = {
 # The location where the master spreadsheet should be written to
 outfile = '../output/master_spreadsheet.xls'
 numCountsToIncludeInRawHistogramSpreadsheet = 100
-histogramSpreadsheetLocation = '../output/raw_top100_histograms.xls'
+fileMapLocation = '../output/filemap.json'
 
 # Map of methods contained in the output files
 methods = {
@@ -194,7 +194,8 @@ def loadOutputFileDirectory(path):
     results = {
         'path': path,
         'results': {},
-        'settings': {}
+        'settings': {},
+        'fileOriginMap': {}
     }
 
     jsonCache = {}
@@ -214,6 +215,7 @@ def loadOutputFileDirectory(path):
             # Read JSON file
             try:
                 fileContents = json.loads(openFile.read())
+                fileContents['resultSetOrigin'] = os.path.join(path, file)
             except Exception as e:
                 print('FAILED TO READ FILE: ' + str(file))
                 print(e)
@@ -248,6 +250,7 @@ def loadOutputFileDirectory(path):
                 raise Exception("Experiment settings mismatch in the same batch! File: " + file)
         previousExperimentSettings = currentExperimentSettings
         results['settings'] = currentExperimentSettings
+        results['fileOriginMap'][fileContents['seed']] = os.path.join(path, file)
 
         for method in methods:
             # Check for other incorrect settings. Ignore files if detected
@@ -357,12 +360,13 @@ def split(directory):
     del inputDirectories[directory]
 
     for itemCountIndex, itemCount in enumerate(result['settings']['sampleObjectCounts']):
-        out = {'results': {}, 'settings': {}}
+        out = {'results': {}, 'settings': {}, 'fileOriginMap': {}}
         for method in methods:
             out['results'][methods[method]['namePrefixInJSONFile']] = {}
 
         out['settings'] = result['settings'].copy()
         out['settings']['sampleObjectCounts'] = [itemCount]
+        out['fileOriginMap'] = result['fileOriginMap'].copy()
 
         for method in methods:
             for seed in result['results'][methods[method]['namePrefixInJSONFile']]:
@@ -396,7 +400,8 @@ def merge(directory1, directory2, newdirectoryName, newDirectoryClusterName):
         print('Directory 1:', directory1_contents['settings'])
         print('Directory 2:', directory2_contents['settings'])
 
-    combinedResults = {'results': {}, 'settings': directory1_contents['settings']}
+    combinedResults = {'results': {}, 'settings': directory1_contents['settings'], 'fileOriginMap': directory1_contents['fileOriginMap']}
+
     for method in methods:
         combinedResults['results'][methods[method]['namePrefixInJSONFile']] = {}
 
@@ -413,6 +418,10 @@ def merge(directory1, directory2, newdirectoryName, newDirectoryClusterName):
             if seed not in combinedResults['results'][type]:
                 combinedResults['results'][type][seed] = directory2_contents['results'][type][seed]
                 additionCount += 1
+
+    for seed in directory2_contents['fileOriginMap'].keys():
+        if seed not in combinedResults['fileOriginMap']:
+            combinedResults['fileOriginMap'][seed] = directory2_contents['fileOriginMap'][seed]
 
     loadedResults[newdirectoryName] = combinedResults
     inputDirectories[newdirectoryName] = (newdirectoryName, newDirectoryClusterName)
@@ -557,6 +566,44 @@ if enableResultSetSizeLimit:
 
 print()
 print('Reduced result set to size', len(seedList))
+print()
+
+
+
+
+print()
+print('Dumping file map..')
+
+correspondingFileMap = {}
+
+directoriesToDump = [
+    '../input/results_computed_by_authors/HEIDRUNS/run1_3dsc_main/output/',
+    'QSI, 1 object',
+    'QSI, 5 objects',
+    'QSI, 10 objects',
+    'SI 180 degrees, 1 object',
+    'SI 180 degrees, 5 objects',
+    'SI 180 degrees, 10 objects']
+
+for directory in directoriesToDump:
+    resultSet = loadedResults[directory]
+    for method in methods:
+        if not method in correspondingFileMap:
+            correspondingFileMap[method] = {}
+        methodName = methods[method]['namePrefixInJSONFile']
+        for seed in resultSet['results'][methodName].keys():
+            entry = resultSet['results'][methodName][seed]
+            sourceFile = ''
+            if int(seed) in resultSet['fileOriginMap']:
+                sourceFile = resultSet['fileOriginMap'][int(seed)]
+            for objectCount in entry['sampleObjectCounts']:
+                if not str(objectCount) in correspondingFileMap[method]:
+                    correspondingFileMap[method][str(objectCount)] = {}
+                correspondingFileMap[method][str(objectCount)][str(seed)] = sourceFile
+
+with open(fileMapLocation, 'w') as fileMapFile:
+    fileMapFile.write(json.dumps(correspondingFileMap, indent=4))
+print('Success.')
 print()
 
 
@@ -815,48 +862,5 @@ for seedIndex, seed in enumerate(seedList + ['dummy entry for final row']):
     totalTriangleCountSheet.write(seedIndex, currentColumn, ' ')
 
 book.save(outfile)
-
-
-print('Main spreadheet dump complete.')
-print()
-print('Dumping histogram spreadsheet..')
-
-book = xlwt.Workbook(encoding="utf-8")
-sheets = {}
-# Create sheets
-for method in methods:
-    sheets[method] = {}
-for method in methods:
-    sheets[method] = book.add_sheet(str(method.upper()))
-
-for method in methods:
-    sheets[method].write(0, 0, 'index')
-    sheets[method].write(0, 1, 'seed')
-    for seedIndex, seed in enumerate(seedList):
-        sheets[method].write(seedIndex + 1, 0, seedIndex + 1)
-        sheets[method].write(seedIndex + 1, 1, seed)
-        entry = resultSet['results'][methods[method]['namePrefixInJSONFile']][seed]
-        for i in range(0, numCountsToIncludeInRawHistogramSpreadsheet):
-            if str(sampleCountIndex) in entry[histogramsString]:
-                if '0' in entry[histogramsString][str(sampleCountIndex)]:
-                    percentageAtPlace0 = float(entry[histogramsString][str(sampleCountIndex)]['0']) / float(
-                        totalImageCount)
-                totalImageCountInTop10 = sum(
-                    [entry[histogramsString][str(sampleCountIndex)][str(x)] for x in range(0, 10) if
-                     str(x) in entry[histogramsString][str(sampleCountIndex)]])
-            else:
-                if '0' in entry[histogramsString][indexNameString]:
-                    percentageAtPlace0 = float(entry[histogramsString][indexNameString]['0']) / float(
-                        totalImageCount)
-                totalImageCountInTop10 = sum(
-                    [entry[histogramsString][indexNameString][str(x)] for x in range(0, 10) if
-                     str(x) in entry[histogramsString][indexNameString]])
-
-    for i in range(0, numCountsToIncludeInRawHistogramSpreadsheet):
-        sheets[method].write(0, i + 2, i)
-
-
-
-book.save(histogramSpreadsheetLocation)
 
 print('Complete.')
