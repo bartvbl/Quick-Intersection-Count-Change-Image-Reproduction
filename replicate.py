@@ -109,7 +109,13 @@ clutterFileMap = None
 
 
 
-def executeClutterboxExperiment(randomSeed):
+def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0):
+    visualisationParameters = ''
+    if matchVisualisationDirectory is not None:
+        visualisationParameters = '--dump-matches-visualisation-obj-directory=' + matchVisualisationDirectory + ' ' \
+                                  '--dump-matches-visualisation-obj-descriptors=' + ','.join(activeDescriptors) + ' ' \
+                                  '--dump-matches-visualisation-obj-threshold=' + str(matchVisualisationThreshold)
+
     run_command_line_command('src/clutterbox/build/clutterbox '
                              '--box-size=1 '
                              '--output-directory=output/clutterbox_results/ '
@@ -123,7 +129,8 @@ def executeClutterboxExperiment(randomSeed):
                              '--spin-image-support-angle-degrees=' + str(spinImageSupportAngle) + ' '
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
-                             '--dump-raw-search-results')
+                             '--dump-raw-search-results ' +
+                             visualisationParameters)
 
 def configureActiveDescriptors():
     while True:
@@ -323,6 +330,73 @@ def runProjectionBenchmark():
         print()
         run_command_line_command('benchmark', 'src/clutterbox/build')
 
+def runOBJDump():
+    os.makedirs('output/highlightedobjects/figure15a', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure15b', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure15c', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure15d', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure15e', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure15f', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure16/toprank', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure16/top4ranks', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure16/top6ranks', exist_ok=True)
+    os.makedirs('output/highlightedobjects/figure16/top12ranks', exist_ok=True)
+
+    while True:
+        visualisation_menu = TerminalMenu([
+            "Generate OBJ files for Figure 15a",
+            "Generate OBJ files for Figure 15b",
+            "Generate OBJ files for Figure 15c",
+            "Generate OBJ files for Figure 15d",
+            "Generate OBJ files for Figure 15e",
+            "Generate OBJ files for Figure 15f",
+            "Generate OBJ files for Figure 16",
+            "Configure descriptors to test (currently active: " + ', '.join(activeDescriptors) + ")",
+            "Configure object counts (currently active: " + ', '.join(activeObjectCounts) + ")",
+            "Configure Spin Image support angle (currently set to " + str(spinImageSupportAngle) + ")",
+            "Configure GPU (use if system has more than one, currently set to GPU " + str(gpuID) + ")",
+            "back"], title='------------ Dump OBJ files with match visualisation ------------')
+        choice = visualisation_menu.show()
+        if choice == 0:
+            executeClutterboxExperiment('3056361425', 'output/highlightedobjects/figure15a', 0)
+        if choice == 1:
+            executeClutterboxExperiment('3461184303', 'output/highlightedobjects/figure15b', 0)
+        if choice == 2:
+            executeClutterboxExperiment('1919129218', 'output/highlightedobjects/figure15c', 0)
+        if choice == 3:
+            executeClutterboxExperiment('3617347629', 'output/highlightedobjects/figure15d', 0)
+        if choice == 4:
+            executeClutterboxExperiment('3500854400', 'output/highlightedobjects/figure15e', 0)
+        if choice == 5:
+            executeClutterboxExperiment('3098714219', 'output/highlightedobjects/figure15f', 0)
+        if choice == 6:
+            print('Generating top rank visualisation')
+            executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/toprank', 0)
+            print()
+            print('Generating top 4 ranks visualisation')
+            executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/top4ranks', 3)
+            print()
+            print('Generating top 6 ranks visualisation')
+            executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/top6ranks', 5)
+            print()
+            print('Generating top 12 ranks visualisation')
+            executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/top12ranks', 11)
+            print()
+        if choice == 7:
+            configureActiveDescriptors()
+            print()
+        if choice == 8:
+            configureActiveObjectCounts()
+            print()
+        if choice == 9:
+            configureSpinImageAngle()
+            print()
+        if choice == 10:
+            configureGPU()
+            print()
+        if choice == 11:
+            return
+
 def runMainMenu():
     main_menu = TerminalMenu([
         "1. Install dependencies",
@@ -332,7 +406,7 @@ def runMainMenu():
         "5. Run Clutterbox experiment",
         "6. Run Clutter fraction estimation",
         "7. Run projection algorithm benchmark (Table 1)",
-        "8. Dump highlighted objects",
+        "8. Dump result visualisation OBJ files",
         "9. exit"], title='---------------------- Main Menu ----------------------')
 
     while True:
@@ -353,7 +427,7 @@ def runMainMenu():
         if choice == 6:
             runProjectionBenchmark()
         if choice == 7:
-            pass
+            runOBJDump()
         if choice == 8:
             return
 
