@@ -57,7 +57,9 @@ int main(int argc, const char **argv)
     const auto& descriptors = parser.add<std::string>("descriptors", "Specify the descriptors that should be used in the experiment, with as valid options \"rici\", \"si\", \"3dsc\", and \"all\", as a comma separated list WITHOUT spaces (e.g. --object-counts=rici,si). Use value \"all\" for using all supported descriptors", '\0', arrrgh::Optional, "all");
     const auto& dumpSceneOBJFiles = parser.add<std::string>("scene-obj-file-dump-directory", "Specifying a directory path will dump OBJ files at each specified object count", '\0', arrrgh::Optional, "NONE_SELECTED");
     const auto& visualiseMatchesDirectory = parser.add<std::string>("dump-matches-visualisation-obj-directory", "Directory where OBJ files indicating top search results should be dumped. Requires --dump-raw-search-results to be enabled.", '\0', arrrgh::Optional, "NONE_SELECTED");
-    const auto& visualiseMatchesDescriptors = parser.add<std::string>("dump-matches-visualisation-obj-descriptors", "Specifies for which descriptors the search results should be visualised. Requires --dump-matches-visualisation-obj-directory to be enabled.", '\0', arrrgh::Optional, "NONE_SELECTED");
+    const auto& visualiseMatchesDescriptors = parser.add<std::string>("dump-matches-visualisation-obj-descriptors", "Specifies for which descriptors the search results should be visualised. Requires --dump-matches-visualisation-obj-directory to be set.", '\0', arrrgh::Optional, "NONE_SELECTED");
+    const auto& visualiseMatchesThreshold = parser.add<int>("dump-matches-visualisation-obj-threshold", "Specifies the rank threshold which should be coloured (0 for top rank only) when visualising search results. Requires --dump-matches-visualisation-obj-directory to be set.", '\0', arrrgh::Optional, 0);
+
 
 	try
 	{
@@ -168,6 +170,7 @@ int main(int argc, const char **argv)
             enableMatchOBJDump,
             matchVisualisationOutputDir,
             matchVisualisationDescriptors,
+            visualiseMatchesThreshold.value(),
             gpuMetaData,
             randomSeed);
 

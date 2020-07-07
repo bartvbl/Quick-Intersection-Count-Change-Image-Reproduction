@@ -26,5 +26,6 @@ void runClutterBoxExperiment(
         bool enableMatchVisualisation,
         std::string matchVisualisationOutputDir,
         std::vector<std::string> matchVisualisationDescriptorList,
+        unsigned int matchVisualisationThreshold,
         GPUMetaData gpuMetaData,
         size_t overrideSeed = 0);

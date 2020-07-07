@@ -440,7 +440,8 @@ void dumpRadialIntersectionCountImages(std::string filename, SpinImage::array<ra
 
 void dumpSearchResultVisualisationMesh(const SpinImage::array<unsigned int> &searchResults,
                                        const SpinImage::gpu::Mesh &referenceDeviceMesh,
-                                       const std::experimental::filesystem::path outFilePath) {
+                                       const std::experimental::filesystem::path outFilePath,
+                                       unsigned int resultThreshold) {
     size_t totalUniqueVertexCount;
     std::vector<size_t> vertexCounts;
     SpinImage::array<signed long long> device_indexMapping = SpinImage::utilities::computeUniqueIndexMapping(referenceDeviceMesh, {referenceDeviceMesh}, &vertexCounts, totalUniqueVertexCount);
@@ -475,7 +476,7 @@ void dumpSearchResultVisualisationMesh(const SpinImage::array<unsigned int> &sea
         // Entry has been marked as duplicate
         // So we need to find the correct index
 
-        float texComponent = searchResult == 0 ? 0.5 : 0;
+        float texComponent = searchResult <= resultThreshold ? 0.5 : 0;
         float2 texCoord = {texComponent, texComponent};
         textureCoords.content[vertexIndex] = texCoord;
     }
@@ -503,6 +504,7 @@ void runClutterBoxExperiment(
         bool enableMatchVisualisation,
         std::string matchVisualisationOutputDir,
         std::vector<std::string> matchVisualisationDescriptorList,
+        unsigned int matchVisualisationThreshold,
         GPUMetaData gpuMetaData,
         size_t overrideSeed) {
 
@@ -764,7 +766,7 @@ void runClutterBoxExperiment(
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
                 outFilePath = outFilePath / (std::to_string(randomSeed) + "_rici_" + std::to_string(objectCount + 1) + ".obj");
-                dumpSearchResultVisualisationMesh(RICIsearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+                dumpSearchResultVisualisationMesh(RICIsearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
             if(!dumpRawSearchResults) {
@@ -844,7 +846,7 @@ void runClutterBoxExperiment(
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
                 outFilePath = outFilePath / (std::to_string(randomSeed) + "_si_" + std::to_string(objectCount + 1) + ".obj");
-                dumpSearchResultVisualisationMesh(SpinImageSearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+                dumpSearchResultVisualisationMesh(SpinImageSearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
             if(!dumpRawSearchResults) {
@@ -897,7 +899,7 @@ void runClutterBoxExperiment(
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
                 outFilePath = outFilePath / (std::to_string(randomSeed) + "_3dsc_" + std::to_string(objectCount + 1) + ".obj");
-                dumpSearchResultVisualisationMesh(ShapeContextSearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+                dumpSearchResultVisualisationMesh(ShapeContextSearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
             if(!dumpRawSearchResults) {
