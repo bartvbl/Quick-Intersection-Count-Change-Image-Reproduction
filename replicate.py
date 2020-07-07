@@ -109,13 +109,15 @@ clutterFileMap = None
 
 
 
-def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0):
+def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0, sceneOBJDumpDirectory = None):
     visualisationParameters = ''
     if matchVisualisationDirectory is not None:
         visualisationParameters = '--dump-matches-visualisation-obj-directory=' + matchVisualisationDirectory + ' ' \
                                   '--dump-matches-visualisation-obj-descriptors=' + ','.join(activeDescriptors) + ' ' \
-                                  '--dump-matches-visualisation-obj-threshold=' + str(matchVisualisationThreshold)
-
+                                  '--dump-matches-visualisation-obj-threshold=' + str(matchVisualisationThreshold) + ' '
+    sceneOBJParameter = ''
+    if sceneOBJDumpDirectory is not None:
+        sceneOBJParameter = '--scene-obj-file-dump-directory=' + sceneOBJDumpDirectory + ' '
     run_command_line_command('src/clutterbox/build/clutterbox '
                              '--box-size=1 '
                              '--output-directory=output/clutterbox_results/ '
@@ -130,7 +132,8 @@ def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, 
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
                              '--dump-raw-search-results ' +
-                             visualisationParameters)
+                             visualisationParameters +
+                             sceneOBJParameter)
 
 def configureActiveDescriptors():
     while True:
@@ -251,7 +254,7 @@ def executeClutterEstimator(indexToCompute):
         print()
         print('In order to be able to show which files must be compared to those generated,')
         print('the directory of clutter estimate files computed by the authors needs to be scanned.')
-        print('This should only take a few seconds.')
+        print('This should only take a few moments.')
         clutterFileMap = {}
 
         clutterfiles = [name for name in os.listdir(estimatedClutterDirectory)
@@ -361,17 +364,17 @@ def runOBJDump():
             "back"], title='------------ Dump OBJ files with match visualisation ------------')
         choice = visualisation_menu.show()
         if choice == 0:
-            executeClutterboxExperiment('3056361425', 'output/highlightedobjects/figure15a', 0)
+            executeClutterboxExperiment('3056361425', 'output/highlightedobjects/figure15a', 0, 'output/highlightedobjects/figure15a')
         if choice == 1:
-            executeClutterboxExperiment('3461184303', 'output/highlightedobjects/figure15b', 0)
+            executeClutterboxExperiment('3461184303', 'output/highlightedobjects/figure15b', 0, 'output/highlightedobjects/figure15b')
         if choice == 2:
-            executeClutterboxExperiment('1919129218', 'output/highlightedobjects/figure15c', 0)
+            executeClutterboxExperiment('1919129218', 'output/highlightedobjects/figure15c', 0, 'output/highlightedobjects/figure15c')
         if choice == 3:
-            executeClutterboxExperiment('3617347629', 'output/highlightedobjects/figure15d', 0)
+            executeClutterboxExperiment('3617347629', 'output/highlightedobjects/figure15d', 0, 'output/highlightedobjects/figure15d')
         if choice == 4:
-            executeClutterboxExperiment('3500854400', 'output/highlightedobjects/figure15e', 0)
+            executeClutterboxExperiment('3500854400', 'output/highlightedobjects/figure15e', 0, 'output/highlightedobjects/figure15e')
         if choice == 5:
-            executeClutterboxExperiment('3098714219', 'output/highlightedobjects/figure15f', 0)
+            executeClutterboxExperiment('3098714219', 'output/highlightedobjects/figure15f', 0, 'output/highlightedobjects/figure15f')
         if choice == 6:
             print('Overriding settings with those used to generate images..')
             print()
