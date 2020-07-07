@@ -765,7 +765,7 @@ void runClutterBoxExperiment(
             if(enableMatchVisualisation && std::find(matchVisualisationDescriptorList.begin(), matchVisualisationDescriptorList.end(), "rici") != matchVisualisationDescriptorList.end()) {
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
-                outFilePath = outFilePath / (std::to_string(randomSeed) + "_rici_" + std::to_string(objectCount + 1) + ".obj");
+                outFilePath = outFilePath / ("searchresults_" + std::to_string(randomSeed) + "_rici_" + std::to_string(objectCount + 1) + ".obj");
                 dumpSearchResultVisualisationMesh(RICIsearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
@@ -845,7 +845,7 @@ void runClutterBoxExperiment(
             if(enableMatchVisualisation && std::find(matchVisualisationDescriptorList.begin(), matchVisualisationDescriptorList.end(), "si") != matchVisualisationDescriptorList.end()) {
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
-                outFilePath = outFilePath / (std::to_string(randomSeed) + "_si_" + std::to_string(objectCount + 1) + ".obj");
+                outFilePath = outFilePath / ("searchresults_" + std::to_string(randomSeed) + "_si_" + std::to_string(objectCount + 1) + ".obj");
                 dumpSearchResultVisualisationMesh(SpinImageSearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
@@ -898,7 +898,7 @@ void runClutterBoxExperiment(
             if(enableMatchVisualisation && std::find(matchVisualisationDescriptorList.begin(), matchVisualisationDescriptorList.end(), "3dsc") != matchVisualisationDescriptorList.end()) {
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
-                outFilePath = outFilePath / (std::to_string(randomSeed) + "_3dsc_" + std::to_string(objectCount + 1) + ".obj");
+                outFilePath = outFilePath / ("searchresults_" + std::to_string(randomSeed) + "_3dsc_" + std::to_string(objectCount + 1) + ".obj");
                 dumpSearchResultVisualisationMesh(ShapeContextSearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
@@ -915,7 +915,7 @@ void runClutterBoxExperiment(
             SpinImage::cpu::Mesh hostMesh = SpinImage::copy::deviceMeshToHost(boxScene);
 
             std::experimental::filesystem::path outFilePath = sceneOBJFileDumpDir;
-            outFilePath = outFilePath / (std::to_string(randomSeed) + "_" + std::to_string(objectCount + 1) + ".obj");
+            outFilePath = outFilePath / ("scene_" + std::to_string(randomSeed) + "_" + std::to_string(objectCount + 1) + ".obj");
 
             std::cout << "\tDumping OBJ file of scene to " << outFilePath << std::endl;
 
