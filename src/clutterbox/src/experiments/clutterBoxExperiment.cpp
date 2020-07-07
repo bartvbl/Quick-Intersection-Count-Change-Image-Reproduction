@@ -695,11 +695,12 @@ void runClutterBoxExperiment(
     // 14 Ensure enough memory is available to complete the experiment.
     if(riciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive) {
         std::cout << "\tTesting for sufficient memory capacity on GPU.. ";
-        int* device_largestNecessaryImageBuffer;
-        size_t largestImageBufferSize = totalUniqueVertexCount * spinImageWidthPixels * spinImageWidthPixels * sizeof(int);
-        checkCudaErrors(cudaMalloc((void**) &device_largestNecessaryImageBuffer, largestImageBufferSize));
-        checkCudaErrors(cudaFree(device_largestNecessaryImageBuffer));
-        std::cout << "Success." << std::endl;
+        //int* device_largestNecessaryImageBuffer;
+        //size_t largestImageBufferSize = totalUniqueVertexCount * spinImageWidthPixels * spinImageWidthPixels * sizeof(int);
+        //checkCudaErrors(cudaMalloc((void**) &device_largestNecessaryImageBuffer, largestImageBufferSize));
+        //checkCudaErrors(cudaFree(device_largestNecessaryImageBuffer));
+        //std::cout << "Success." << std::endl;
+        std::cout << "Skipped, feature disabled." << std::endl;
     }
 
     std::vector<SpinImage::array<unsigned int>> rawRICISearchResults;
@@ -955,6 +956,7 @@ void runClutterBoxExperiment(
             spinImageSampleCounts,
             gpuMetaData);
 
+    std::cout << std::endl;
     if(dumpRawSearchResults) {
         dumpRawSearchResultFile(
                 outputDirectory + "raw/" + timestring + "_" + std::to_string(randomSeed) + ".json",
@@ -982,7 +984,10 @@ void runClutterBoxExperiment(
         SpinImage::gpu::freeMesh(deviceMesh);
     }
 
-    std::cout << std::endl << "Complete." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Experiment complete. Results have been written to:" << std::endl;
+    std::cout << std::endl << "    " << outputDirectory + timestring + "_" + std::to_string(randomSeed) + ".json" << std::endl;
+    std::cout << std::endl;
 }
 
 

@@ -269,6 +269,7 @@ def executeClutterEstimator(indexToCompute):
     dumpfiles.sort()
 
     print('Computing clutter estimate file for file index', indexToCompute)
+    print()
     run_command_line_command('src/clutterbox/build/clutterEstimator '
                              '--result-dump-dir=' + clutterSourceDumpFileDirectory + ' '
                              '--object-dir=input/SHREC17/ '
@@ -279,7 +280,6 @@ def executeClutterEstimator(indexToCompute):
     print()
     print('You should compare this produced file to:')
     print()
-    print()
     dumpFilePath = os.path.join(clutterSourceDumpFileDirectory, dumpfiles[indexToCompute])
     try:
         with open(dumpFilePath, 'r') as openFile:
@@ -288,6 +288,7 @@ def executeClutterEstimator(indexToCompute):
             print('   ', clutterFileMap[str(dumpFileSeed)])
     except Exception as e:
         print('FAILED TO READ FILE: ' + dumpFilePath, e)
+    print()
 
 def runClutterEstimation():
     fileCount = len([name for name in os.listdir(clutterSourceDumpFileDirectory)
@@ -331,7 +332,8 @@ def runMainMenu():
         "5. Run Clutterbox experiment",
         "6. Run Clutter fraction estimation",
         "7. Run projection algorithm benchmark (Table 1)",
-        "8. exit"], title='---------------------- Main Menu ----------------------')
+        "8. Dump highlighted objects",
+        "9. exit"], title='---------------------- Main Menu ----------------------')
 
     while True:
         choice = main_menu.show()
@@ -351,6 +353,8 @@ def runMainMenu():
         if choice == 6:
             runProjectionBenchmark()
         if choice == 7:
+            pass
+        if choice == 8:
             return
 
 def runIntroSequence():
