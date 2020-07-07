@@ -331,6 +331,9 @@ def runProjectionBenchmark():
         run_command_line_command('benchmark', 'src/clutterbox/build')
 
 def runOBJDump():
+    global activeDescriptors
+    global activeObjectCounts
+
     os.makedirs('output/highlightedobjects/figure15a', exist_ok=True)
     os.makedirs('output/highlightedobjects/figure15b', exist_ok=True)
     os.makedirs('output/highlightedobjects/figure15c', exist_ok=True)
@@ -370,6 +373,13 @@ def runOBJDump():
         if choice == 5:
             executeClutterboxExperiment('3098714219', 'output/highlightedobjects/figure15f', 0)
         if choice == 6:
+            print('Overriding settings with those used to generate images..')
+            print()
+            backup_objectCounts = activeObjectCounts
+            backup_descriptors = activeDescriptors
+            activeObjectCounts = ['1']
+            activeDescriptors = ['rici']
+
             print('Generating top rank visualisation')
             executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/toprank', 0)
             print()
@@ -382,6 +392,8 @@ def runOBJDump():
             print('Generating top 12 ranks visualisation')
             executeClutterboxExperiment('3048759171', 'output/highlightedobjects/figure16/top12ranks', 11)
             print()
+            activeObjectCounts = backup_objectCounts
+            activeDescriptors = backup_descriptors
         if choice == 7:
             configureActiveDescriptors()
             print()
