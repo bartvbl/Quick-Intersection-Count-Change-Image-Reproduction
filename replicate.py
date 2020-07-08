@@ -152,6 +152,11 @@ def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, 
     for descriptor in activeDescriptors:
         for objectCount in activeObjectCounts:
             print('- ' + descriptor.upper() + " descriptor, " + str(objectCount) + " objects in total in the clutterbox: ", end='')
+            if descriptor == 'si':
+                if spinImageSupportAngle == 60:
+                    descriptor += '60'
+                else:
+                    descriptor += '180'
             if randomSeed in clutterFileMap[descriptor.upper()][str(objectCount)]:
                 filePath = clutterFileMap[descriptor.upper()][str(objectCount)][str(randomSeed)]
                 relativePath = os.path.relpath(os.path.abspath(os.path.normpath(os.path.join('scripts/', filePath))))
