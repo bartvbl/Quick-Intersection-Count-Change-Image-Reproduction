@@ -116,6 +116,8 @@ estimatedClutterDirectory = 'input/clutter_estimated_by_authors/clutter/'
 with open('output/filemap.json') as fileMapFile:
     clutterFileMap = json.loads(fileMapFile.read())
 
+clutterSeedToFileMap = None
+
 
 
 def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0, sceneOBJDumpDirectory = None):
@@ -272,13 +274,13 @@ def runClutterbox():
             return
 
 def executeClutterEstimator(indexToCompute):
-    global clutterFileMap
-    if clutterFileMap is None:
+    global clutterSeedToFileMap
+    if clutterSeedToFileMap is None:
         print()
         print('In order to be able to show which files must be compared to those generated,')
         print('the directory of clutter estimate files computed by the authors needs to be scanned.')
         print('This should only take a few moments.')
-        clutterFileMap = {}
+        clutterSeedToFileMap = {}
 
         clutterfiles = [name for name in os.listdir(estimatedClutterDirectory)
                      if os.path.isfile(os.path.join(estimatedClutterDirectory, name))]
@@ -289,7 +291,7 @@ def executeClutterEstimator(indexToCompute):
                 try:
                     clutterFileContents = json.loads(openFile.read())
                     seed = clutterFileContents['sourceFile'].split('.')[0].split('_')[2]
-                    clutterFileMap[seed] = os.path.join(estimatedClutterDirectory, clutterfile)
+                    clutterSeedToFileMap[seed] = os.path.join(estimatedClutterDirectory, clutterfile)
                 except Exception as e:
                     print('FAILED TO READ FILE: ' + str(clutterfile))
                     print(e)
@@ -318,7 +320,7 @@ def executeClutterEstimator(indexToCompute):
         with open(dumpFilePath, 'r') as openFile:
             dumpFileContents = json.loads(openFile.read())
             dumpFileSeed = dumpFileContents['seed']
-            print('   ', clutterFileMap[str(dumpFileSeed)])
+            print('   ', clutterSeedToFileMap[str(dumpFileSeed)])
     except Exception as e:
         print('FAILED TO READ FILE: ' + dumpFilePath, e)
     print()
