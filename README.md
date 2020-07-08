@@ -23,6 +23,10 @@ Refer to the included Manual PDF for further instructions.
 
 ## System Requirements
 
+The RAM and Disk space requirements are only valid when attempting to reproduce the presented results.
+
+The codebase _should_ be able to compile on Windows, but due to some CUDA driver/SDK compatbility issues we have not yet been able to verify this.
+
 Type | Requirements
 -----|----------------------------------------------------------------------------
 CPU  | Does not matter
