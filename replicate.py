@@ -3,7 +3,7 @@ import os
 import subprocess
 import random
 
-from simple_term_menu import TerminalMenu
+from scripts.simple_term_menu import TerminalMenu
 
 def run_command_line_command(command, working_directory='.'):
     print('>> Executing command:', command)
