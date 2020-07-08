@@ -5,8 +5,8 @@ cmake_minimum_required (VERSION 3.0)
 
 set(CUDAHOSTCXX /usr/bin/g++-7)
 set(CMAKE_CUDA_HOST_COMPILER /usr/bin/g++-7)
-set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
-set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda/")
+#set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+#set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda/")
 
 project (clutterbox CXX CUDA)
 

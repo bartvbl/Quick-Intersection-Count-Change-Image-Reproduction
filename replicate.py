@@ -61,7 +61,7 @@ def installDependenciesMenu():
 
         if choice == 0:
             run_command_line_command('sudo apt install cmake python3 python3-pip libpcl-dev g++-7 gcc-7 wget p7zip')
-            run_command_line_command('sudo pip3 install console-menu xlwt numpy matplotlib pillow')
+            run_command_line_command('sudo pip3 install simple-term-menu xlwt numpy matplotlib pillow')
             print()
         if choice == 1:
             run_command_line_command('sudo apt install nvidia-cuda-toolkit nvidia-cuda-dev')
