@@ -89,6 +89,10 @@ outfile = '../output/master_spreadsheet.xls'
 numCountsToIncludeInRawHistogramSpreadsheet = 100
 fileMapLocation = '../output/filemap.json'
 
+with open('../res/seeds_used_to_create_charts.txt') as seedFile:
+    seedsUsedToCreateCharts = [str(x).strip() for x in seedFile.readlines()]
+
+
 # Map of methods contained in the output files
 methods = {
     'RICI': {
@@ -556,7 +560,12 @@ for method in methods:
 rawSeedList = [x for x in rawSeedList if x in seedList]
 print('Merged with seedList:', len(rawSeedList))
 rawSeedList = [x for x in rawSeedList if x in clutterFileMap.keys()]
-print('Seeds remaining:', len(rawSeedList), '(after merging with clutter file map)')
+print('Merged with clutter file map:', len(rawSeedList))
+rawSeedList = [x for x in rawSeedList if x in seedsUsedToCreateCharts]
+print('Merged with seed list used for paper:', len(rawSeedList))
+print('Seeds remaining:', len(rawSeedList))
+
+
 
 # We want to make sure our dataset contains entries for ALL data points
 seedList = rawSeedList
