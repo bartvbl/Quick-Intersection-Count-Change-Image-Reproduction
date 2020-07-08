@@ -87,6 +87,7 @@ inputDirectories = {
 # The location where the master spreadsheet should be written to
 outfile = '../output/master_spreadsheet.xls'
 numCountsToIncludeInRawHistogramSpreadsheet = 100
+
 fileMapLocation = '../output/filemap.json'
 
 with open('../res/seeds_used_to_create_charts.txt') as seedFile:
@@ -592,14 +593,26 @@ directoriesToDump = [
     'QSI, 10 objects',
     'SI 180 degrees, 1 object',
     'SI 180 degrees, 5 objects',
-    'SI 180 degrees, 10 objects']
+    'SI 180 degrees, 10 objects',
+    'SI 60 degrees, 1 object',
+    'SI 60 degrees, 5 objects',
+    'SI 60 degrees, 10 objects']
 
 for directory in directoriesToDump:
     resultSet = loadedResults[directory]
     for method in methods:
+        methodName = methods[method]['namePrefixInJSONFile']
+
+        if method == 'SI':
+            # Need to distinguish between support angles
+            if '60' in directory:
+                method += '60'
+            else:
+                method += '180'
+
         if not method in correspondingFileMap:
             correspondingFileMap[method] = {}
-        methodName = methods[method]['namePrefixInJSONFile']
+
         for seed in resultSet['results'][methodName].keys():
             entry = resultSet['results'][methodName][seed]
             sourceFile = ''
