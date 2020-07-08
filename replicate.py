@@ -158,6 +158,7 @@ def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, 
                 print(relativePath)
             else:
                 print('(missing)')
+    print()
 
 
 def configureActiveDescriptors():
@@ -356,7 +357,7 @@ def runProjectionBenchmark():
         print()
         print('Compilation complete, running benchmark..')
         print()
-        run_command_line_command('benchmark', 'src/clutterbox/build')
+        run_command_line_command('./benchmark', 'src/clutterbox/build')
 
 def runOBJDump():
     global activeDescriptors
