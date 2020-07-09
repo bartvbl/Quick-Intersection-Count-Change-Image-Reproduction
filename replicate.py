@@ -100,6 +100,8 @@ def runSpreadsheetBuilder():
     if ask_for_confirmation('The spreadsheet construction script will consume around 16GB of RAM.\nYou should close any applications to ensure you do not run out of memory.\nContinue?'):
         print()
         run_command_line_command('python3 compileresultfiles.py', 'scripts/')
+        print()
+        run_command_line_command('python3 generatechartsspreadsheet.py', 'scripts/')
 
 
 activeDescriptors = ['rici', 'si', '3dsc']
