@@ -123,6 +123,7 @@ clutterSeedToFileMap = None
 
 
 def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0, sceneOBJDumpDirectory = None):
+    os.makedirs('output/clutterbox_results', exist_ok=True)
     visualisationParameters = ''
     if matchVisualisationDirectory is not None:
         visualisationParameters = '--dump-matches-visualisation-obj-directory=' + matchVisualisationDirectory + ' ' \
