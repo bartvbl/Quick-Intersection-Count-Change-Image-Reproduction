@@ -284,6 +284,7 @@ def runClutterbox():
 
 def executeClutterEstimator(indexToCompute):
     global clutterSeedToFileMap
+    os.makedirs('output/estimated_clutter', exist_ok=True)
     if clutterSeedToFileMap is None:
         print()
         print('In order to be able to show which files must be compared to those generated,')
