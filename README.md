@@ -1,15 +1,13 @@
-# Source code repository for the paper "Radial Intersection Count Image: a Clutter Resistant Shape Descriptor"
+# Source code repository for the paper "An Indexing Scheme and Descriptor for 3D Object Retrieval Based on Local Shape Querying"
 
 This repository contains:
 
-- A reference implementation of the Radial Intersection Count Image
-- Efficient GPU implementations of the Spin Image and 3D Shape Context descriptors
-- A reference implementation of the Clutterbox Experiment
+- A reference implementation of the Quick Intersection Count Change Image (along with the other tested descriptors in the paper's evaluation)
 - A script which can be used to completely reproduce all results presented in the paper
 
 ## Instructions
 
-You can run the start the script by running:
+You can run the script by running:
 
 ```bash
 
