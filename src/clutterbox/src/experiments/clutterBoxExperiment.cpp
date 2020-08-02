@@ -16,10 +16,14 @@
 #include <spinImage/gpu/types/Mesh.h>
 #include <spinImage/gpu/radialIntersectionCountImageGenerator.cuh>
 #include <spinImage/gpu/radialIntersectionCountImageSearcher.cuh>
+#include <spinImage/gpu/quickIntersectionCountImageGenerator.cuh>
+#include <spinImage/gpu/quickIntersectionCountImageSearcher.cuh>
 #include <spinImage/gpu/spinImageGenerator.cuh>
 #include <spinImage/gpu/spinImageSearcher.cuh>
 #include <spinImage/gpu/3dShapeContextGenerator.cuh>
 #include <spinImage/gpu/3dShapeContextSearcher.cuh>
+#include <spinImage/gpu/fastPointFeatureHistogramGenerator.cuh>
+#include <spinImage/gpu/fastPointFeatureHistogramSearcher.cuh>
 #include <spinImage/utilities/OBJLoader.h>
 #include <spinImage/utilities/copy/hostMeshToDevice.h>
 #include <spinImage/utilities/copy/deviceDescriptorsToHost.h>
@@ -70,8 +74,10 @@ void dumpResultsFile(
         std::vector<std::string> descriptorList,
         size_t seed,
         std::vector<Histogram> RICIHistograms,
+        std::vector<Histogram> QUICCIHistograms,
         std::vector<Histogram> SIHistograms,
         std::vector<Histogram> SCHistograms,
+        std::vector<Histogram> FPFHHistograms,
         const std::string &sourceFileDirectory,
         std::vector<int> objectCountList,
         int overrideObjectCount,
@@ -79,13 +85,18 @@ void dumpResultsFile(
         float spinImageWidth,
         float pointDensityRadius3dsc,
         float minSupportRadius3dsc,
+        unsigned int fpfhBinCount,
         size_t assertionRandomToken,
         std::vector<SpinImage::debug::RICIRunInfo> RICIRuns,
+        std::vector<SpinImage::debug::QUICCIRunInfo> QUICCIRuns,
         std::vector<SpinImage::debug::SIRunInfo> SIRuns,
         std::vector<SpinImage::debug::SCRunInfo> SCRuns,
+        std::vector<SpinImage::debug::FPFHRunInfo> FPFHRuns,
         std::vector<SpinImage::debug::RICISearchRunInfo> RICISearchRuns,
+        std::vector<SpinImage::debug::QUICCISearchRunInfo> QUICCISearchRuns,
         std::vector<SpinImage::debug::SISearchRunInfo> SISearchRuns,
         std::vector<SpinImage::debug::SCSearchRunInfo> SCSearchRuns,
+        std::vector<SpinImage::debug::FPFHSearchRunInfo> FPFHSearchRuns,
         float spinImageSupportAngleDegrees,
         std::vector<size_t> uniqueVertexCounts,
         std::vector<size_t> spinImageSampleCounts,
@@ -146,16 +157,22 @@ void dumpResultsFile(
     }
 
     bool riciDescriptorActive = false;
+    bool quicciDescriptorActive = false;
     bool siDescriptorActive = false;
     bool scDescriptorActive = false;
+    bool fpfhDescriptorActive = false;
 
     for(const auto& descriptor : descriptorList) {
         if(descriptor == "rici") {
             riciDescriptorActive = true;
+        } else if(descriptor == "quicci") {
+            quicciDescriptorActive = true;
         } else if(descriptor == "si") {
             siDescriptorActive = true;
         } else if(descriptor == "3dsc") {
             scDescriptorActive = true;
+        } else if(descriptor == "fpfh") {
+            fpfhDescriptorActive = true;
         }
     }
 
@@ -175,8 +192,16 @@ void dumpResultsFile(
     outJson["spinImageSupportAngle"] = spinImageSupportAngleDegrees;
     outJson["spinImageSampleCounts"] = spinImageSampleCounts;
     outJson["searchResultCount"] = SEARCH_RESULT_COUNT;
+    outJson["fpfhBinCount"] = fpfhBinCount;
     outJson["3dscMinSupportRadius"] = minSupportRadius3dsc;
     outJson["3dscPointDensityRadius"] = pointDensityRadius3dsc;
+#if QUICCI_DISTANCE_FUNCTION == CLUTTER_RESISTANT_DISTANCE
+    outJson["quicciDistanceFunction"] = "clutterResistant";
+#elif QUICCI_DISTANCE_FUNCTION == WEIGHTED_HAMMING_DISTANCE
+    outJson["quicciDistanceFunction"] = "weightedHamming";
+#elif QUICCI_DISTANCE_FUNCTION == HAMMING_DISTANCE
+    outJson["quicciDistanceFunction"] = "hamming";
+#endif
     outJson["gpuInfo"] = {};
     outJson["gpuInfo"]["name"] = gpuMetaData.name;
     outJson["gpuInfo"]["clockrate"] = gpuMetaData.clockRate;
@@ -212,6 +237,24 @@ void dumpResultsFile(
             outJson["runtimes"]["RICISampleGeneration"]["meshScale"].push_back(RICIRuns.at(i).meshScaleTimeSeconds);
             outJson["runtimes"]["RICISampleGeneration"]["redistribution"].push_back(RICIRuns.at(i).redistributionTimeSeconds);
             outJson["runtimes"]["RICISampleGeneration"]["generation"].push_back(RICIRuns.at(i).generationTimeSeconds);
+        }
+    }
+
+    if(quicciDescriptorActive) {
+        outJson["runtimes"]["QUICCIReferenceGeneration"]["total"] = QUICCIRuns.at(0).totalExecutionTimeSeconds;
+        outJson["runtimes"]["QUICCIReferenceGeneration"]["meshScale"] = QUICCIRuns.at(0).meshScaleTimeSeconds;
+        outJson["runtimes"]["QUICCIReferenceGeneration"]["redistribution"] = QUICCIRuns.at(0).redistributionTimeSeconds;
+        outJson["runtimes"]["QUICCIReferenceGeneration"]["generation"] = QUICCIRuns.at(0).generationTimeSeconds;
+
+        outJson["runtimes"]["QUICCISampleGeneration"]["total"] = {};
+        outJson["runtimes"]["QUICCISampleGeneration"]["generation"] = {};
+        outJson["runtimes"]["QUICCISampleGeneration"]["meshScale"] = {};
+        outJson["runtimes"]["QUICCISampleGeneration"]["redistribution"] = {};
+        for(unsigned int i = 1; i < QUICCIRuns.size(); i++) {
+            outJson["runtimes"]["QUICCISampleGeneration"]["total"].push_back(QUICCIRuns.at(i).totalExecutionTimeSeconds);
+            outJson["runtimes"]["QUICCISampleGeneration"]["meshScale"].push_back(QUICCIRuns.at(i).meshScaleTimeSeconds);
+            outJson["runtimes"]["QUICCISampleGeneration"]["redistribution"].push_back(QUICCIRuns.at(i).redistributionTimeSeconds);
+            outJson["runtimes"]["QUICCISampleGeneration"]["generation"].push_back(QUICCIRuns.at(i).generationTimeSeconds);
         }
     }
 
@@ -254,12 +297,42 @@ void dumpResultsFile(
         }
     }
 
+    if(fpfhDescriptorActive) {
+        outJson["runtimes"]["FPFHReferenceGeneration"]["total"] = FPFHRuns.at(0).totalExecutionTimeSeconds;
+        outJson["runtimes"]["FPFHReferenceGeneration"]["reformat"] = FPFHRuns.at(0).originReformatExecutionTimeSeconds;
+        outJson["runtimes"]["FPFHReferenceGeneration"]["spfh_origins"] = FPFHRuns.at(0).originSPFHGenerationExecutionTimeSeconds;
+        outJson["runtimes"]["FPFHReferenceGeneration"]["spfh_pointCloud"] = FPFHRuns.at(0).pointCloudSPFHGenerationExecutionTimeSeconds;
+        outJson["runtimes"]["FPFHReferenceGeneration"]["generation"] = FPFHRuns.at(0).fpfhGenerationExecutionTimeSeconds;
+
+        outJson["runtimes"]["FPFHSampleGeneration"]["total"] = {};
+        outJson["runtimes"]["FPFHSampleGeneration"]["reformat"] = {};
+        outJson["runtimes"]["FPFHSampleGeneration"]["spfh_origins"] = {};
+        outJson["runtimes"]["FPFHSampleGeneration"]["spfh_pointCloud"] = {};
+        outJson["runtimes"]["FPFHSampleGeneration"]["generation"] = {};
+        for(unsigned int i = 1; i < FPFHRuns.size(); i++) {
+            outJson["runtimes"]["FPFHSampleGeneration"]["total"].push_back(FPFHRuns.at(i).totalExecutionTimeSeconds);
+            outJson["runtimes"]["FPFHSampleGeneration"]["reformat"].push_back(FPFHRuns.at(i).originReformatExecutionTimeSeconds);
+            outJson["runtimes"]["FPFHSampleGeneration"]["spfh_origins"].push_back(FPFHRuns.at(i).originSPFHGenerationExecutionTimeSeconds);
+            outJson["runtimes"]["FPFHSampleGeneration"]["spfh_pointCloud"].push_back(FPFHRuns.at(i).pointCloudSPFHGenerationExecutionTimeSeconds);
+            outJson["runtimes"]["FPFHSampleGeneration"]["generation"].push_back(FPFHRuns.at(i).fpfhGenerationExecutionTimeSeconds);
+        }
+    }
+
     if(riciDescriptorActive) {
         outJson["runtimes"]["RICISearch"]["total"] = {};
         outJson["runtimes"]["RICISearch"]["search"] = {};
         for (auto &RICISearchRun : RICISearchRuns) {
             outJson["runtimes"]["RICISearch"]["total"].push_back(RICISearchRun.totalExecutionTimeSeconds);
             outJson["runtimes"]["RICISearch"]["search"].push_back(RICISearchRun.searchExecutionTimeSeconds);
+        }
+    }
+
+    if(quicciDescriptorActive) {
+        outJson["runtimes"]["QUICCISearch"]["total"] = {};
+        outJson["runtimes"]["QUICCISearch"]["search"] = {};
+        for (auto &QUICCISearchRun : QUICCISearchRuns) {
+            outJson["runtimes"]["QUICCISearch"]["total"].push_back(QUICCISearchRun.totalExecutionTimeSeconds);
+            outJson["runtimes"]["QUICCISearch"]["search"].push_back(QUICCISearchRun.searchExecutionTimeSeconds);
         }
     }
 
@@ -283,6 +356,15 @@ void dumpResultsFile(
         }
     }
 
+    if(fpfhDescriptorActive) {
+        outJson["runtimes"]["FPFHSearch"]["total"] = {};
+        outJson["runtimes"]["FPFHSearch"]["search"] = {};
+        for (auto &FPFHSearchRun : FPFHSearchRuns) {
+            outJson["runtimes"]["FPFHSearch"]["total"].push_back(FPFHSearchRun.totalExecutionTimeSeconds);
+            outJson["runtimes"]["FPFHSearch"]["search"].push_back(FPFHSearchRun.searchExecutionTimeSeconds);
+        }
+    }
+
     if(riciDescriptorActive) {
         outJson["RICIhistograms"] = {};
         for(unsigned int i = 0; i < objectCountList.size(); i++) {
@@ -295,6 +377,22 @@ void dumpResultsFile(
 
             for(auto &key : keys) {
                 outJson["RICIhistograms"][std::to_string(objectCountList.at(i)) + " objects"][std::to_string(key)] = riciMap[key];
+            }
+        }
+    }
+
+    if(quicciDescriptorActive) {
+        outJson["QUICCIhistograms"] = {};
+        for(unsigned int i = 0; i < objectCountList.size(); i++) {
+            std::map<unsigned int, size_t> quicciMap = QUICCIHistograms.at(i).getMap();
+            std::vector<unsigned int> keys;
+            for (auto &content : quicciMap) {
+                keys.push_back(content.first);
+            }
+            std::sort(keys.begin(), keys.end());
+
+            for(auto &key : keys) {
+                outJson["QUICCIhistograms"][std::to_string(objectCountList.at(i)) + " objects"][std::to_string(key)] = quicciMap[key];
             }
         }
     }
@@ -331,6 +429,22 @@ void dumpResultsFile(
         }
     }
 
+    if(fpfhDescriptorActive) {
+        outJson["FPFHhistograms"] = {};
+        for(unsigned int i = 0; i < objectCountList.size(); i++) {
+            std::map<unsigned int, size_t> fpfhMap = FPFHHistograms.at(i).getMap();
+            std::vector<unsigned int> keys;
+            for (auto &content : fpfhMap) {
+                keys.push_back(content.first);
+            }
+            std::sort(keys.begin(), keys.end());
+
+            for(auto &key : keys) {
+                outJson["FPFHhistograms"][std::to_string(objectCountList.at(i)) + " objects"][std::to_string(key)] = fpfhMap[key];
+            }
+        }
+    }
+
     std::ofstream outFile(outputFile);
     outFile << outJson.dump(4);
     outFile.close();
@@ -345,8 +459,10 @@ void dumpRawSearchResultFile(
         std::vector<std::string> descriptorList,
         std::vector<int> objectCountList,
         std::vector<SpinImage::array<unsigned int>> rawRICISearchResults,
+        std::vector<SpinImage::array<unsigned int>> rawQUICCISearchResults,
         std::vector<SpinImage::array<unsigned int>> rawSISearchResults,
         std::vector<SpinImage::array<unsigned int>> rawSCSearchResults,
+        std::vector<SpinImage::array<unsigned int>> rawFPFHSearchResults,
         size_t seed) {
 
     std::cout << "Dumping raw search results to " << outputFile << ".." << std::endl;
@@ -358,16 +474,22 @@ void dumpRawSearchResultFile(
     outJson["seed"] = seed;
 
     bool riciDescriptorActive = false;
+    bool quicciDescriptorActive = false;
     bool siDescriptorActive = false;
     bool scDescriptorActive = false;
+    bool fpfhDescriptorActive = false;
 
     for(const auto& descriptor : descriptorList) {
         if(descriptor == "rici") {
             riciDescriptorActive = true;
+        } else if(descriptor == "quicci") {
+            quicciDescriptorActive = true;
         } else if(descriptor == "si") {
             siDescriptorActive = true;
         } else if(descriptor == "3dsc") {
             scDescriptorActive = true;
+        } else if(descriptor == "fpfh") {
+            fpfhDescriptorActive = true;
         }
     }
 
@@ -379,6 +501,18 @@ void dumpRawSearchResultFile(
             outJson["RICI"][indexString] = {};
             for(int j = 0; j < rawRICISearchResults.at(i).length; j++) {
                 outJson["RICI"][indexString].push_back(rawRICISearchResults.at(i).content[j]);
+            }
+        }
+    }
+
+    // QUICCI block
+    if(quicciDescriptorActive) {
+        outJson["QUICCI"] = {};
+        for(int i = 0; i < rawQUICCISearchResults.size(); i++) {
+            std::string indexString = std::to_string(objectCountList.at(i));
+            outJson["QUICCI"][indexString] = {};
+            for(int j = 0; j < rawQUICCISearchResults.at(i).length; j++) {
+                outJson["QUICCI"][indexString].push_back(rawQUICCISearchResults.at(i).content[j]);
             }
         }
     }
@@ -403,6 +537,18 @@ void dumpRawSearchResultFile(
             outJson["3DSC"][indexString] = {};
             for(int j = 0; j < rawSCSearchResults.at(i).length; j++) {
                 outJson["3DSC"][indexString].push_back(rawSCSearchResults.at(i).content[j]);
+            }
+        }
+    }
+
+    // FPFH block
+    if(fpfhDescriptorActive) {
+        outJson["FPFH"] = {};
+        for(int i = 0; i < rawFPFHSearchResults.size(); i++) {
+            std::string indexString = std::to_string(objectCountList.at(i));
+            outJson["FPFH"][indexString] = {};
+            for(int j = 0; j < rawFPFHSearchResults.at(i).length; j++) {
+                outJson["FPFH"][indexString].push_back(rawFPFHSearchResults.at(i).content[j]);
             }
         }
     }
@@ -497,6 +643,7 @@ void runClutterBoxExperiment(
         float minSupportRadius3dsc,
         float supportRadius,
         float spinImageSupportAngleDegrees,
+        unsigned int fpfhBinCount,
         bool dumpRawSearchResults,
         std::string outputDirectory,
         bool dumpSceneOBJFiles,
@@ -510,21 +657,29 @@ void runClutterBoxExperiment(
 
     // Determine which algorithms to enable
     bool riciDescriptorActive = false;
+    bool quicciDescriptorActive = false;
     bool siDescriptorActive = false;
     bool shapeContextDescriptorActive = false;
+    bool fastPointFeatureHistogramActive = false;
 
     std::cout << "Running clutterbox experiment for the following descriptors: ";
 
     for(const auto& descriptor : descriptorList) {
         if(descriptor == "rici") {
             riciDescriptorActive = true;
-            std::cout << (siDescriptorActive || shapeContextDescriptorActive ? ", " : "") << "Radial Intersection Count Image";
+            std::cout << (quicciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive || fastPointFeatureHistogramActive ? ", " : "") << "Radial Intersection Count Image";
         } else if(descriptor == "si") {
             siDescriptorActive = true;
-            std::cout << (riciDescriptorActive || shapeContextDescriptorActive ? ", " : "") << "Spin Image";
+            std::cout << (quicciDescriptorActive || riciDescriptorActive || shapeContextDescriptorActive || fastPointFeatureHistogramActive ? ", " : "") << "Spin Image";
+        } else if(descriptor == "quicci") {
+            quicciDescriptorActive = true;
+            std::cout << (riciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive || fastPointFeatureHistogramActive ? ", " : "") << "Quick Intersection Count Change Image";
         } else if(descriptor == "3dsc") {
             shapeContextDescriptorActive = true;
-            std::cout << (riciDescriptorActive || siDescriptorActive ? ", " : "") << "3D Shape Context";
+            std::cout << (quicciDescriptorActive || riciDescriptorActive || siDescriptorActive || fastPointFeatureHistogramActive ? ", " : "") << "3D Shape Context";
+        } else if(descriptor == "fpfh") {
+            fastPointFeatureHistogramActive = true;
+            std::cout << (quicciDescriptorActive || riciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive ? ", " : "") << "3D Shape Context";
         }
     }
     std::cout << std::endl;
@@ -547,14 +702,20 @@ void runClutterBoxExperiment(
     std::vector<Histogram> RICIHistograms;
     std::vector<Histogram> spinImageHistograms;
     std::vector<Histogram> shapeContextHistograms;
+    std::vector<Histogram> QUICCIHistograms;
+    std::vector<Histogram> FPFHHistograms;
 
     std::vector<SpinImage::debug::RICIRunInfo> RICIRuns;
     std::vector<SpinImage::debug::SIRunInfo> SIRuns;
     std::vector<SpinImage::debug::SCRunInfo> ShapeContextRuns;
+    std::vector<SpinImage::debug::QUICCIRunInfo> QUICCIRuns;
+    std::vector<SpinImage::debug::FPFHRunInfo> FPFHRuns;
 
     std::vector<SpinImage::debug::SISearchRunInfo> SISearchRuns;
     std::vector<SpinImage::debug::RICISearchRunInfo> RICISearchRuns;
     std::vector<SpinImage::debug::SCSearchRunInfo> ShapeContextSearchRuns;
+    std::vector<SpinImage::debug::QUICCISearchRunInfo> QUICCISearchRuns;
+    std::vector<SpinImage::debug::FPFHSearchRunInfo> FPFHSearchRuns;
 
     // The number of sample objects that need to be loaded depends on the largest number of objects required in the list
     int sampleObjectCount = *std::max_element(objectCountList.begin(), objectCountList.end());
@@ -622,6 +783,8 @@ void runClutterBoxExperiment(
     SpinImage::array<radialIntersectionCountImagePixelType> device_referenceRICIImages;
     SpinImage::array<spinImagePixelType> device_referenceSpinImages;
     SpinImage::array<shapeContextBinType> device_referenceShapeContextDescriptors;
+    SpinImage::gpu::QUICCIImages device_referenceQuiccImages;
+    SpinImage::gpu::FPFHHistograms device_referenceFPFHHistograms;
 
     if(riciDescriptorActive) {
         std::cout << "\tGenerating reference RICI images.. (" << referenceImageCount << " images)" << std::endl;
@@ -634,6 +797,20 @@ void runClutterBoxExperiment(
 
         RICIRuns.push_back(riciReferenceRunInfo);
         std::cout << "\t\tExecution time: " << riciReferenceRunInfo.generationTimeSeconds << std::endl;
+    }
+
+    if(quicciDescriptorActive) {
+        std::cout << "\tGenerating QUICCI images.." << std::endl;
+
+        SpinImage::debug::QUICCIRunInfo quicciReferenceRunInfo;
+        device_referenceQuiccImages = SpinImage::gpu::generateQUICCImages(
+                scaledMeshesOnGPU.at(0),
+                spinOrigins_reference,
+                supportRadius,
+                &quicciReferenceRunInfo);
+
+        QUICCIRuns.push_back(quicciReferenceRunInfo);
+        std::cout << "\t\tExecution time: " << quicciReferenceRunInfo.generationTimeSeconds << std::endl;
     }
 
     size_t referenceGenerationRandomSeed = generator();
@@ -670,6 +847,22 @@ void runClutterBoxExperiment(
         std::cout << "\t\tExecution time: " << scReferenceRunInfo.generationTimeSeconds << std::endl;
     }
 
+    if(fastPointFeatureHistogramActive) {
+        std::cout << "\tGenerating reference FPFH descriptors.." << std::endl;
+        SpinImage::debug::FPFHRunInfo fpfhReferenceRunInfo;
+        device_referenceFPFHHistograms = SpinImage::gpu::generateFPFHHistograms(
+                scaledMeshesOnGPU.at(0),
+                spinOrigins_reference,
+                supportRadius,
+                fpfhBinCount,
+                spinImageSampleCount,
+                referenceGenerationRandomSeed,
+                &fpfhReferenceRunInfo);
+
+        FPFHRuns.push_back(fpfhReferenceRunInfo);
+        std::cout << "\t\tExecution time: " << fpfhReferenceRunInfo.totalExecutionTimeSeconds << std::endl;
+    }
+
     checkCudaErrors(cudaFree(spinOrigins_reference.content));
 
     // 10 Combine meshes into one larger scene
@@ -695,7 +888,7 @@ void runClutterBoxExperiment(
     size_t imageCount = 0;
 
     // 14 Ensure enough memory is available to complete the experiment.
-    if(riciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive) {
+    if(riciDescriptorActive || quicciDescriptorActive || siDescriptorActive || shapeContextDescriptorActive) {
         std::cout << "\tTesting for sufficient memory capacity on GPU.. ";
         //int* device_largestNecessaryImageBuffer;
         //size_t largestImageBufferSize = totalUniqueVertexCount * spinImageWidthPixels * spinImageWidthPixels * sizeof(int);
@@ -706,7 +899,9 @@ void runClutterBoxExperiment(
     }
 
     std::vector<SpinImage::array<unsigned int>> rawRICISearchResults;
+    std::vector<SpinImage::array<unsigned int>> rawQUICCISearchResults;
     std::vector<SpinImage::array<unsigned int>> rawSISearchResults;
+    std::vector<SpinImage::array<unsigned int>> rawFPFHSearchResults;
     std::vector<SpinImage::array<unsigned int>> raw3DSCSearchResults;
     std::vector<size_t> spinImageSampleCounts;
 
@@ -780,10 +975,52 @@ void runClutterBoxExperiment(
             cudaFree(device_sampleRICIImages.content);
         }
 
+        if(quicciDescriptorActive) {
+            std::cout << "\tGenerating QUICCI images.. (" << imageCount << " images)" << std::endl;
+            SpinImage::debug::QUICCIRunInfo quicciSampleRunInfo;
+            SpinImage::gpu::QUICCIImages device_sampleQUICCImages = SpinImage::gpu::generateQUICCImages(
+                    boxScene,
+                    device_uniqueSpinOrigins,
+                    supportRadius,
+                    &quicciSampleRunInfo);
+            QUICCIRuns.push_back(quicciSampleRunInfo);
+            std::cout << "\t\tTimings: (total " << quicciSampleRunInfo.totalExecutionTimeSeconds
+                      << ", generation " << quicciSampleRunInfo.generationTimeSeconds << ")" << std::endl;
+
+            std::cout << "\tSearching in QUICC images.." << std::endl;
+            SpinImage::debug::QUICCISearchRunInfo quicciSearchRun;
+            SpinImage::array<unsigned int> QUICCIsearchResults = SpinImage::gpu::computeQUICCImageSearchResultRanks(
+                    device_referenceQuiccImages,
+                    referenceMeshImageCount,
+                    device_sampleQUICCImages,
+                    imageCount,
+                    &quicciSearchRun);
+            QUICCISearchRuns.push_back(quicciSearchRun);
+            rawQUICCISearchResults.push_back(QUICCIsearchResults);
+            std::cout << "\t\tTimings: (total " << quicciSearchRun.totalExecutionTimeSeconds
+                      << ", searching " << quicciSearchRun.searchExecutionTimeSeconds << ")" << std::endl;
+            Histogram QUICCIHistogram = computeSearchResultHistogram(referenceMeshImageCount, QUICCIsearchResults);
+            cudaFree(device_sampleQUICCImages.images);
+
+            if(enableMatchVisualisation && std::find(matchVisualisationDescriptorList.begin(), matchVisualisationDescriptorList.end(), "quicci") != matchVisualisationDescriptorList.end()) {
+                std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
+                std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
+                outFilePath = outFilePath / (std::to_string(randomSeed) + "_quicci_" + std::to_string(objectCount + 1) + ".obj");
+                dumpSearchResultVisualisationMesh(QUICCIsearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+            }
+
+            if(!dumpRawSearchResults) {
+                delete[] QUICCIsearchResults.content;
+            }
+
+            // Storing results
+            QUICCIHistograms.push_back(QUICCIHistogram);
+        }
+
         // Computing common settings for SI, FPFH, and 3DSC
         size_t meshSamplingSeed = generator();
         size_t currentReferenceObjectSampleCount = 0;
-        if(siDescriptorActive || shapeContextDescriptorActive) {
+        if(siDescriptorActive || shapeContextDescriptorActive || fastPointFeatureHistogramActive) {
             spinImageSampleCount = computeSpinImageSampleCount(imageCount);
             spinImageSampleCounts.push_back(spinImageSampleCount);
 
@@ -910,6 +1147,53 @@ void runClutterBoxExperiment(
             shapeContextHistograms.push_back(SCHistogram);
         }
 
+
+        // Generating Fast Point Feature Histograms
+        if(fastPointFeatureHistogramActive) {
+            std::cout << "\tGenerating Fast Point Feature Histograms.. (" << imageCount << " images, " << spinImageSampleCount << " samples)" << std::endl;
+            SpinImage::debug::FPFHRunInfo fpfhSampleRunInfo;
+            SpinImage::gpu::FPFHHistograms device_sampleFPFHHistograms = SpinImage::gpu::generateFPFHHistograms(
+                    boxScene,
+                    device_uniqueSpinOrigins,
+                    supportRadius,
+                    fpfhBinCount,
+                    spinImageSampleCount,
+                    meshSamplingSeed,
+                    &fpfhSampleRunInfo);
+
+            FPFHRuns.push_back(fpfhSampleRunInfo);
+            std::cout << "\t\tTimings: (total " << fpfhSampleRunInfo.totalExecutionTimeSeconds << ")" << std::endl;
+
+            std::cout << "\tSearching in FPFH descriptors.." << std::endl;
+            SpinImage::debug::FPFHSearchRunInfo fpfhSearchRun;
+            SpinImage::array<unsigned int> FPFHSearchResults = SpinImage::gpu::computeFPFHSearchResultRanks(
+                    device_referenceFPFHHistograms,
+                    referenceMeshImageCount,
+                    device_sampleFPFHHistograms,
+                    imageCount,
+                    &fpfhSearchRun);
+            FPFHSearchRuns.push_back(fpfhSearchRun);
+            rawFPFHSearchResults.push_back(FPFHSearchResults);
+            std::cout << "\t\tTimings: (total " << fpfhSearchRun.totalExecutionTimeSeconds << ")" << std::endl;
+            Histogram FPFHHistogram = computeSearchResultHistogram(referenceMeshImageCount, FPFHSearchResults);
+            cudaFree(device_sampleFPFHHistograms.histograms);
+
+            if(enableMatchVisualisation && std::find(matchVisualisationDescriptorList.begin(), matchVisualisationDescriptorList.end(), "fpfh") != matchVisualisationDescriptorList.end()) {
+                std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
+                std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
+                outFilePath = outFilePath / (std::to_string(randomSeed) + "_fpfh_" + std::to_string(objectCount + 1) + ".obj");
+                dumpSearchResultVisualisationMesh(FPFHSearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+            }
+
+            if(!dumpRawSearchResults) {
+                delete[] FPFHSearchResults.content;
+            }
+
+            // Storing results
+            FPFHHistograms.push_back(FPFHHistogram);
+        }
+
+
         // Dumping OBJ file of current scene, if enabled
         if(dumpSceneOBJFiles) {
             SpinImage::cpu::Mesh hostMesh = SpinImage::copy::deviceMeshToHost(boxScene);
@@ -928,6 +1212,7 @@ void runClutterBoxExperiment(
     SpinImage::gpu::freeMesh(boxScene);
     cudaFree(device_referenceRICIImages.content);
     cudaFree(device_referenceSpinImages.content);
+    cudaFree(device_referenceQuiccImages.images);
     cudaFree(device_uniqueSpinOrigins.content);
 
     std::string timestring = getCurrentDateTimeString();
@@ -937,8 +1222,10 @@ void runClutterBoxExperiment(
             descriptorList,
             randomSeed,
             RICIHistograms,
+            QUICCIHistograms,
             spinImageHistograms,
             shapeContextHistograms,
+            FPFHHistograms,
             objectDirectory,
             objectCountList,
             overrideObjectCount,
@@ -946,13 +1233,18 @@ void runClutterBoxExperiment(
             supportRadius,
             minSupportRadius3dsc,
             pointDensityRadius3dsc,
+            fpfhBinCount,
             generator(),
             RICIRuns,
+            QUICCIRuns,
             SIRuns,
             ShapeContextRuns,
+            FPFHRuns,
             RICISearchRuns,
+            QUICCISearchRuns,
             SISearchRuns,
             ShapeContextSearchRuns,
+            FPFHSearchRuns,
             spinImageSupportAngleDegrees,
             uniqueVertexCounts,
             spinImageSampleCounts,
@@ -965,8 +1257,10 @@ void runClutterBoxExperiment(
                 descriptorList,
                 objectCountList,
                 rawRICISearchResults,
+                rawQUICCISearchResults,
                 rawSISearchResults,
                 raw3DSCSearchResults,
+                rawFPFHSearchResults,
                 randomSeed);
 
         // Cleanup
@@ -974,7 +1268,13 @@ void runClutterBoxExperiment(
         for(auto results : rawRICISearchResults) {
             delete[] results.content;
         }
+        for(auto results : rawQUICCISearchResults) {
+            delete[] results.content;
+        }
         for(auto results : rawSISearchResults) {
+            delete[] results.content;
+        }
+        for(auto results : rawFPFHSearchResults) {
             delete[] results.content;
         }
         for(auto results : raw3DSCSearchResults) {
