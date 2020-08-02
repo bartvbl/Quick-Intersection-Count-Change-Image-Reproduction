@@ -1006,7 +1006,7 @@ void runClutterBoxExperiment(
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
                 outFilePath = outFilePath / (std::to_string(randomSeed) + "_quicci_" + std::to_string(objectCount + 1) + ".obj");
-                dumpSearchResultVisualisationMesh(QUICCIsearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+                dumpSearchResultVisualisationMesh(QUICCIsearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
             if(!dumpRawSearchResults) {
@@ -1182,7 +1182,7 @@ void runClutterBoxExperiment(
                 std::cout << "\tDumping OBJ visualisation of search results.." << std::endl;
                 std::experimental::filesystem::path outFilePath = matchVisualisationOutputDir;
                 outFilePath = outFilePath / (std::to_string(randomSeed) + "_fpfh_" + std::to_string(objectCount + 1) + ".obj");
-                dumpSearchResultVisualisationMesh(FPFHSearchResults, scaledMeshesOnGPU.at(0), outFilePath);
+                dumpSearchResultVisualisationMesh(FPFHSearchResults, scaledMeshesOnGPU.at(0), outFilePath, matchVisualisationThreshold);
             }
 
             if(!dumpRawSearchResults) {
