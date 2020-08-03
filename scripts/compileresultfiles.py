@@ -42,7 +42,11 @@ def isSiResultValid(fileCreationDateTime, resultJson):
 def is3dscResultValid(fileCreationTime, resultJson):
     return True
 
+def isQuicciResultValid(fileCreationTime, resultJson):
+    return True
 
+def isFPFHResultValid(fileCreationTime, resultJson):
+    return True
 
 
 
@@ -82,6 +86,12 @@ inputDirectories = {
 
     # 3DSC, execution time and matching performance are both measured
     '../input/results_computed_by_authors/HEIDRUNS/run1_3dsc_main/output/': ('3DSC', 'HEID'),
+
+    # QUICCI, execution time and matching performance are both measured
+    '../input/results_computed_by_authors/HEIDRUNS/run6_output_quicci_distance_functions_clutterResistant/output/': ('QUICCI', 'HEID'),
+
+    # FPFH, execution time and matching performance are both measured
+    '../input/results_computed_by_authors/HEIDRUNS/run9_output_fpfh_run/output/': ('FPFH', 'HEID'),
 }
 
 # The location where the master spreadsheet should be written to
@@ -103,6 +113,13 @@ methods = {
         'generationTimings': ['total', 'meshScale', 'redistribution', 'generation'],
         'searchTimings': ['total', 'search']
     },
+    'QUICCI': {
+        'isValid': isQuicciResultValid,
+        'nameInJSONFile': 'quicci',
+        'namePrefixInJSONFile': 'QUICCI',
+        'generationTimings': ['total', 'meshScale', 'redistribution', 'generation'],
+        'searchTimings': ['total', 'search']
+    },
     'SI': {
         'isValid': isSiResultValid,
         'nameInJSONFile': 'si',
@@ -117,6 +134,13 @@ methods = {
         'generationTimings': ['total', 'initialisation', 'sampling', 'pointCounting', 'generation'],
         'searchTimings': ['total', 'search']
     },
+    'FPFH': {
+        'isValid': isFPFHResultValid,
+        'nameInJSONFile': 'fpfh',
+        'namePrefixInJSONFile': 'FPFH',
+        'generationTimings': ['total', 'reformat', 'spfh_origins', 'spfh_pointCloud', 'generation'],
+        'searchTimings': ['total', 'search']
+    }
 }
 
 
@@ -127,9 +151,11 @@ heatmapSize = 256
 rawInputDirectories = {
     'QSI': ['../input/results_computed_by_authors/HEIDRUNS/output_seeds_qsi_v4_5objects_missing/output/raw', 
             '../input/results_computed_by_authors/IDUNRUNS/output_lotsofobjects_v4/raw'],
+    'QUICCI': ['../input/results_computed_by_authors/HEIDRUNS/run6_output_quicci_distance_functions_clutterResistant/output/raw'],
     'SI': ['../input/results_computed_by_authors/HEIDRUNS/output_qsifix_v4_lotsofobjects_5_objects_only/output/raw', 
            '../input/results_computed_by_authors/IDUNRUNS/output_mainchart_si_v4_15/raw'],
     '3DSC': ['../input/results_computed_by_authors/HEIDRUNS/run1_3dsc_main/output/raw'],
+    'FPFH': ['../input/results_computed_by_authors/HEIDRUNS/run9_output_fpfh_run/output/raw'],
 }
 rawInputObjectCount = 5
 
@@ -516,6 +542,9 @@ if removeSeedsWithMissingEntries:
         cutCount = 0
         for seed in seedList:
             for method in methods:
+                # Hack to allow FPFH to have missing entries
+                if method == 'FPFH':
+                    continue
                 if len(loadedResults[directory]['results'][methods[method]['namePrefixInJSONFile']]) > 0:
                     if not seed in loadedResults[directory]['results'][methods[method]['namePrefixInJSONFile']]:
                         missingSeeds.append(seed)
@@ -556,10 +585,13 @@ print('\nComputing condensed seed set')
 rawSeedList = loadedRawResults[methods[[x for x in methods.keys()][0]]['namePrefixInJSONFile']].keys()
 print('Starting raw RICI seed set size:', len(rawSeedList))
 for method in methods:
+    # Hack to ensure all results are included (FPFH only has 500 results)
+    if method == 'FPFH':
+        continue
     rawSeedList = [x for x in rawSeedList if x in loadedRawResults[methods[method]['namePrefixInJSONFile']].keys()]
     print('Merged with ' + method + ':', len(rawSeedList))
-rawSeedList = [x for x in rawSeedList if x in seedList]
-print('Merged with seedList:', len(rawSeedList))
+#rawSeedList = [x for x in rawSeedList if x in seedList]
+#print('Merged with seedList:', len(rawSeedList))
 rawSeedList = [x for x in rawSeedList if x in clutterFileMap.keys()]
 print('Merged with clutter file map:', len(rawSeedList))
 rawSeedList = [x for x in rawSeedList if x in seedsUsedToCreateCharts]
@@ -573,6 +605,8 @@ seedList = rawSeedList
 
 if enableResultSetSizeLimit:
     seedList = [x for index, x in enumerate(seedList) if index < resultSetSizeLimit]
+
+rawSeedList = seedList
 
 print()
 print('Reduced result set to size', len(seedList))
@@ -596,7 +630,9 @@ directoriesToDump = [
     'SI 180 degrees, 10 objects',
     'SI 60 degrees, 1 object',
     'SI 60 degrees, 5 objects',
-    'SI 60 degrees, 10 objects']
+    'SI 60 degrees, 10 objects',
+    '../input/results_computed_by_authors/HEIDRUNS/run6_output_quicci_distance_functions_clutterResistant/output/',
+    '../input/results_computed_by_authors/HEIDRUNS/run9_output_fpfh_run/output/']
 
 for directory in directoriesToDump:
     resultSet = loadedResults[directory]
@@ -645,6 +681,9 @@ for rawSeedIndex, rawSeed in enumerate(rawSeedList):
     histogramEntryCount += len(clutterValues)
 
     for method in methods:
+        if not rawSeed in loadedRawResults[methods[method]['namePrefixInJSONFile']]:
+            continue
+
         ranks = loadedRawResults[methods[method]['namePrefixInJSONFile']][rawSeed]
 
         if not(len(clutterValues) == len(ranks)):
