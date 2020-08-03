@@ -104,7 +104,7 @@ def runSpreadsheetBuilder():
         run_command_line_command('python3 generatechartsspreadsheet.py', 'scripts/')
 
 
-activeDescriptors = ['rici', 'si', '3dsc']
+activeDescriptors = ['rici', 'si', '3dsc', 'quicci', 'fpfh']
 activeObjectCounts = ['1', '5', '10']
 spinImageSupportAngle = 180
 gpuID = 0
@@ -175,6 +175,8 @@ def configureActiveDescriptors():
             "Generate results for Radial Intersection Count Image: " + ("enabled" if "rici" in activeDescriptors else "disabled"),
             "Generate results for Spin Image: " + ("enabled" if "si" in activeDescriptors else "disabled"),
             "Generate results for 3D Shape Context: " + ("enabled" if "3dsc" in activeDescriptors else "disabled"),
+            "Generate results for Quick Intersection Count Change Image: " + ("enabled" if "quicci" in activeDescriptors else "disabled"),
+            "Generate results for Fast Point Feature Histograms: " + ("enabled" if "fpfh" in activeDescriptors else "disabled"),
             "done"], title='-- Configure descriptors to be tested --')
         choice = run_menu.show()
         if choice == 0:
@@ -193,6 +195,16 @@ def configureActiveDescriptors():
             else:
                 activeDescriptors.append("3dsc")
         if choice == 3:
+            if "quicci" in activeDescriptors:
+                activeDescriptors.remove("quicci")
+            else:
+                activeDescriptors.append("quicci")
+        if choice == 4:
+            if "fpfh" in activeDescriptors:
+                activeDescriptors.remove("fpfh")
+            else:
+                activeDescriptors.append("fpfh")
+        if choice == 5:
             return
 
 def configureActiveObjectCounts():
@@ -362,10 +374,13 @@ def runMainMenu():
         "1. Install dependencies",
         "2. Download datasets",
         "3. Compile project",
-        "4. Compile author generated results into spreadsheets",
-        "5. Run Clutterbox experiment",
-        "6. Run Clutter fraction estimation",
-        "9. exit"], title='---------------------- Main Menu ----------------------')
+        "4. Run Hamming Tree Evaluation (Figure 7)",
+        "5. Compile author generated results into spreadsheets (Figures 8-11)",
+        "6. Run Clutterbox experiment (used for Figures 8-11)",
+        "7. Run Clutter fraction estimation (used for Figures 8-11)",
+        "8. Render scene shown in Figure 12",
+        "9. Run Evaluation of Distance Functions (Figure 13)",
+        "10. exit"], title='---------------------- Main Menu ----------------------')
 
     while True:
         choice = main_menu.show()
@@ -379,10 +394,16 @@ def runMainMenu():
         if choice == 3:
             runSpreadsheetBuilder()
         if choice == 4:
-            runClutterbox()
+            pass
         if choice == 5:
+            runClutterbox()
+        if choice == 6:
             runClutterEstimation()
+        if choice == 7:
+            pass
         if choice == 8:
+            pass
+        if choice == 9:
             return
 
 def runIntroSequence():
