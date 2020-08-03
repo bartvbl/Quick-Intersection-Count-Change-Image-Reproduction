@@ -178,7 +178,6 @@ enableResultSetSizeLimit = True
 print()
 print(' === Processing of experiment output files into the master spreadsheet ===')
 print('This spreadsheet contains the exact data used to construct the charts in the paper')
-print('Having a machine with 32GB of RAM is probably a necessity for running this')
 print()
 
 matplotlib.use('Qt5Agg')
