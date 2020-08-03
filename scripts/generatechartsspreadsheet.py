@@ -9,25 +9,29 @@ def readColumn(sheet, column, fromRow, toRow):
         columnContents.append(sheet.cell(row, column).value)
     return columnContents
 
-def writeColumn(sheet, columnContents, column, fromRow, toRow):
-    for row in range(fromRow, toRow + 1):
-        sheet.write(row, column, columnContents[row - fromRow])
+def writeColumn(sheet, columnContents, column, fromRow, toRow, step = 1):
+    for row in range(fromRow, toRow + 1, step):
+        sheet.write(row + step - 1, column, columnContents[(row - fromRow) // step])
 
 print('Reading master spreadsheet..')
 
 master_spreadsheet = xlrd.open_workbook('../output/master_spreadsheet.xls')
 book = xlwt.Workbook(encoding="utf-8")
 
-print('Generating matching performance spreadsheet..')
+matchingPerformanceSheet = book.add_sheet("Figure 8 Matching Performance")
+comparisonRateSheet = book.add_sheet("Figure 10 Comparison Rates")
+generationRateSheet = book.add_sheet("Figure 11 Generation Rates")
 
-matchingPerformanceSheet = book.add_sheet("Figure 10 Matching Performance")
+print('Generating matching performance spreadsheet..')
 
 # Write headers
 matchingPerformanceHeaders = \
     ['Experiment Index',
-     'RICI with 1 uncluttered object', 'RICI with 4 added clutter objects', 'RICI with 9 added clutter objects',
-     'SI with 1 uncluttered object',   'SI with 4 added clutter objects',   'SI with 9 added clutter objects',
-     '3DSC with 1 uncluttered object', '3DSC with 4 added clutter objects', '3DSC with 9 added clutter objects']
+     'RICI with 1 uncluttered object',   'RICI with 4 added clutter objects',   'RICI with 9 added clutter objects',
+     'SI with 1 uncluttered object',     'SI with 4 added clutter objects',     'SI with 9 added clutter objects',
+     '3DSC with 1 uncluttered object',   '3DSC with 4 added clutter objects',   '3DSC with 9 added clutter objects'
+     'QUICCI with 1 uncluttered object', 'QUICCI with 4 added clutter objects', 'QUICCI with 9 added clutter objects',
+     'FPFH with 1 uncluttered object',   'FPFH with 4 added clutter objects',   'FPFH with 9 added clutter objects',]
 
 for i in range(0, len(matchingPerformanceHeaders)):
     matchingPerformanceSheet.write(0, i, matchingPerformanceHeaders[i])
@@ -35,17 +39,31 @@ for i in range(0, len(matchingPerformanceHeaders)):
 writeColumn(matchingPerformanceSheet, [x for x in range(1, 1501)], 0, 1, 1500)
 
 # Read data from master spreadsheet
-rici_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 6, 1, 1500)
-rici_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 7, 1, 1500)
-rici_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 8, 1, 1500)
+rici_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 12, 1, 1500)
+rici_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 13, 1, 1500)
+rici_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 RICI results'), 14, 1, 1500)
 
-si_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 9, 1, 1500)
-si_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 10, 1, 1500)
-si_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 11, 1, 1500)
+si_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 15, 1, 1500)
+si_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 16, 1, 1500)
+si_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 17, 1, 1500)
 
 sc_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 3DSC results'), 3, 1, 1500)
 sc_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 3DSC results'), 4, 1, 1500)
 sc_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 3DSC results'), 5, 1, 1500)
+
+quicci_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 QUICCI results'), 6, 1, 1500)
+quicci_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 QUICCI results'), 7, 1, 1500)
+quicci_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 QUICCI results'), 8, 1, 1500)
+
+fpfh_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 FPFH results'), 9, 1, 1528)
+fpfh_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 FPFH results'), 10, 1, 1528)
+fpfh_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 FPFH results'), 11, 1, 1528)
+
+# Avoid errors as FPFH has fewer entries
+
+fpfh_matching_performance_1_object = [x for x in fpfh_matching_performance_1_object if x != ' ']
+fpfh_matching_performance_5_objects = [x for x in fpfh_matching_performance_5_objects if x != ' ']
+fpfh_matching_performance_10_objects = [x for x in fpfh_matching_performance_10_objects if x != ' ']
 
 # Sort each sequence individually for better readability
 rici_matching_performance_1_object.sort()
@@ -60,6 +78,14 @@ sc_matching_performance_1_object.sort()
 sc_matching_performance_5_objects.sort()
 sc_matching_performance_10_objects.sort()
 
+quicci_matching_performance_1_object.sort()
+quicci_matching_performance_5_objects.sort()
+quicci_matching_performance_10_objects.sort()
+
+fpfh_matching_performance_1_object.sort()
+fpfh_matching_performance_5_objects.sort()
+fpfh_matching_performance_10_objects.sort()
+
 # Write data to spreadsheet
 writeColumn(matchingPerformanceSheet, rici_matching_performance_1_object, 1, 1, 1500)
 writeColumn(matchingPerformanceSheet, rici_matching_performance_5_objects, 2, 1, 1500)
@@ -73,77 +99,60 @@ writeColumn(matchingPerformanceSheet, sc_matching_performance_1_object, 7, 1, 15
 writeColumn(matchingPerformanceSheet, sc_matching_performance_5_objects, 8, 1, 1500)
 writeColumn(matchingPerformanceSheet, sc_matching_performance_10_objects, 9, 1, 1500)
 
-print('Generating spin image support angle spreadsheet..')
+writeColumn(matchingPerformanceSheet, quicci_matching_performance_1_object, 10, 1, 1500)
+writeColumn(matchingPerformanceSheet, quicci_matching_performance_5_objects, 11, 1, 1500)
+writeColumn(matchingPerformanceSheet, quicci_matching_performance_10_objects, 12, 1, 1500)
 
-supportAngleSheet = book.add_sheet("Figure 11 Support Angle")
-
-# Write headers
-supportAngleHeaders = \
-    ['Experiment Index',
-     'SI, no support angle, 1 uncluttered object',
-     'SI, no support angle, 4 added clutter objects',
-     'SI, no support angle, 9 added clutter objects',
-     'SI, 60° support angle, 1 uncluttered object',
-     'SI, 60° support angle, 4 added clutter objects',
-     'SI, 60° support angle, 9 added clutter objects']
-
-for i in range(0, len(supportAngleHeaders)):
-    supportAngleSheet.write(0, i, supportAngleHeaders[i])
-
-writeColumn(supportAngleSheet, [x for x in range(1, 1501)], 0, 1, 1500)
-
-# Can reuse the columns from before as they are the same
-writeColumn(supportAngleSheet, si_matching_performance_1_object, 1, 1, 1500)
-writeColumn(supportAngleSheet, si_matching_performance_5_objects, 2, 1, 1500)
-writeColumn(supportAngleSheet, si_matching_performance_10_objects, 3, 1, 1500)
-
-# 60 degree matching results are new, though
-si_60_matching_performance_1_object = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 12, 1, 1500)
-si_60_matching_performance_5_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 13, 1, 1500)
-si_60_matching_performance_10_objects = readColumn(master_spreadsheet.sheet_by_name('Rank 0 SI results'), 14, 1, 1500)
-
-si_60_matching_performance_1_object.sort()
-si_60_matching_performance_5_objects.sort()
-si_60_matching_performance_10_objects.sort()
-
-writeColumn(supportAngleSheet, si_60_matching_performance_1_object, 4, 1, 1500)
-writeColumn(supportAngleSheet, si_60_matching_performance_5_objects, 5, 1, 1500)
-writeColumn(supportAngleSheet, si_60_matching_performance_10_objects, 6, 1, 1500)
+writeColumn(matchingPerformanceSheet, fpfh_matching_performance_1_object, 13, 1, 1500, step=3)
+writeColumn(matchingPerformanceSheet, fpfh_matching_performance_5_objects, 14, 1, 1500, step=3)
+writeColumn(matchingPerformanceSheet, fpfh_matching_performance_10_objects, 15, 1, 1500, step=3)
 
 print('Generating descriptor generation rate spreadsheet..')
-
-generationRateSheet = book.add_sheet("Figure 13 Generation Rates")
 
 # Write headers
 generationRateHeaders = \
     ['Triangle Count',
      'RICI',
      'SI',
-     '3DSC']
+     '3DSC',
+     'QUICCI',
+     'FPFH']
 
 for i in range(0, len(generationRateHeaders)):
     generationRateSheet.write(0, i, generationRateHeaders[i])
 
 rici_generation_times = readColumn(master_spreadsheet.sheet_by_name('RICI Generation Times'), 2, 1, 1500)
-si_generation_times = readColumn(master_spreadsheet.sheet_by_name('SI Generation Times'), 10, 1, 1500)
+si_generation_times = readColumn(master_spreadsheet.sheet_by_name('SI Generation Times'), 16, 1, 1500)
 sc_generation_times = readColumn(master_spreadsheet.sheet_by_name('3DSC Generation Times'), 4, 1, 1500)
+quicci_generation_times = readColumn(master_spreadsheet.sheet_by_name('QUICCI Generation Times'), 7, 1, 1500)
+fpfh_generation_times = readColumn(master_spreadsheet.sheet_by_name('FPFH Generation Times'), 10, 1, 1528)
 
 scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 1, 1, 1500)
 triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 1, 1, 1500)
+
+fpfh_specific_scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 10, 1500, 1528)
+fpfh_specific_triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 10, 1500, 1528)
 
 # Generation rate is image count / time taken -> images / second
 rici_generation_rates = [imageCount / rici_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
 si_generation_rates = [imageCount / si_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
 sc_generation_rates = [imageCount / sc_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
+quicci_generation_rates = [imageCount / quicci_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
+fpfh_generation_rates = [imageCount
+                         #imageCount / fpfh_generation_times[index]
+                         #if isinstance(fpfh_generation_times[index], float) else ' '
+                         for index, imageCount in enumerate(scene_image_counts_5_objects[0:-1] + fpfh_specific_scene_image_counts_5_objects)]
 
-writeColumn(generationRateSheet, triangle_counts_5_objects, 0, 1, 1500)
+writeColumn(generationRateSheet, triangle_counts_5_objects + fpfh_specific_triangle_counts_5_objects, 0, 1, 1528)
 writeColumn(generationRateSheet, rici_generation_rates, 1, 1, 1500)
 writeColumn(generationRateSheet, si_generation_rates, 2, 1, 1500)
 writeColumn(generationRateSheet, sc_generation_rates, 3, 1, 1500)
+writeColumn(generationRateSheet, quicci_generation_rates, 4, 1, 1500)
+writeColumn(generationRateSheet, fpfh_generation_rates, 5, 1, 1528)
 
 print('Generating descriptor comparison rate spreadsheet..')
 
-comparisonRateSheet = book.add_sheet("Figure 14 Comparison Rates")
+
 
 # Write headers
 comparisonRateHeaders = \
@@ -166,7 +175,7 @@ comparison_counts_5_objects = [reference_image_counts_5_objects[index] * scene_i
 
 rici_noearlyexit_comparison_times = readColumn(master_spreadsheet.sheet_by_name('RICI Comparison Times'), 1, 1, 1500)
 rici_earlyexit_comparison_times = readColumn(master_spreadsheet.sheet_by_name('RICI Comparison Times'), 2, 1, 1500)
-si_comparison_times = readColumn(master_spreadsheet.sheet_by_name('SI Comparison Times'), 10, 1, 1500)
+si_comparison_times = readColumn(master_spreadsheet.sheet_by_name('SI Comparison Times'), 16, 1, 1500)
 sc_comparison_times = readColumn(master_spreadsheet.sheet_by_name('3DSC Comparison Times'), 4, 1, 1500)
 
 # Comparison rate is comparisons / time taken
