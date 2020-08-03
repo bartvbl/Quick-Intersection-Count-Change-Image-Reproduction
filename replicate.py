@@ -102,11 +102,11 @@ def runSpreadsheetBuilder():
         run_command_line_command('python3 compileresultfiles.py', 'scripts/')
         print()
         run_command_line_command('python3 generatechartsspreadsheet.py', 'scripts/')
+        print()
 
 
 activeDescriptors = ['rici', 'si', '3dsc', 'quicci', 'fpfh']
 activeObjectCounts = ['1', '5', '10']
-spinImageSupportAngle = 180
 gpuID = 0
 seedFileLocation = 'res/seeds_used_for_clutterbox_experiments.txt'
 with open(seedFileLocation) as seedFile:
@@ -142,7 +142,7 @@ def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, 
                              '--support-radius=0.3 '
                              '--force-gpu=' + str(gpuID) + ' '
                              '--force-seed=' + str(randomSeed) + ' '
-                             '--spin-image-support-angle-degrees=' + str(spinImageSupportAngle) + ' '
+                             '--spin-image-support-angle-degrees=180 '
                              '--3dsc-min-support-radius=0.048 '
                              '--3dsc-point-density-radius=0.096 '
                              '--dump-raw-search-results ' +
@@ -156,9 +156,6 @@ def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, 
         for objectCount in activeObjectCounts:
             print('- ' + descriptor.upper() + " descriptor, " + str(objectCount) + " objects in total in the clutterbox: ", end='')
             if descriptor == 'si':
-                if spinImageSupportAngle == 60:
-                    descriptor += '60'
-                else:
                     descriptor += '180'
             if randomSeed in clutterFileMap[descriptor.upper()][str(objectCount)]:
                 filePath = clutterFileMap[descriptor.upper()][str(objectCount)][str(randomSeed)]
@@ -234,18 +231,6 @@ def configureActiveObjectCounts():
             activeObjectCounts.sort()
             return
 
-def configureSpinImageAngle():
-    global spinImageSupportAngle
-    spinangle_menu = TerminalMenu([
-        "Set spin image support angle to 180 degrees (used for most charts)",
-        "Set spin image support angle to 60 degrees (used for Figure 11)"],
-        title='-- Configure spin image support angle to use during testing --')
-    choice = spinangle_menu.show()
-    if choice == 0:
-        spinImageSupportAngle = 180
-    if choice == 1:
-        spinImageSupportAngle = 60
-
 def configureGPU():
     global gpuID
     run_command_line_command('src/clutterbox/build/clutterbox --list-gpus')
@@ -261,7 +246,6 @@ def runClutterbox():
             "Run experiment with manually entered random seed",
             "Configure descriptors to test (currently active: " + ', '.join(activeDescriptors) + ")",
             "Configure object counts (currently active: " + ', '.join(activeObjectCounts) + ")",
-            "Configure Spin Image support angle (currently set to " + str(spinImageSupportAngle) + ")",
             "Configure GPU (use if system has more than one, currently set to GPU " + str(gpuID) + ")",
             "back"], title='------------ Run Clutterbox Experiment ------------')
         choice = run_menu.show()
@@ -286,12 +270,9 @@ def runClutterbox():
             configureActiveObjectCounts()
             print()
         if choice == 5:
-            configureSpinImageAngle()
-            print()
-        if choice == 6:
             configureGPU()
             print()
-        if choice == 7:
+        if choice == 6:
             return
 
 def executeClutterEstimator(indexToCompute):
@@ -392,9 +373,9 @@ def runMainMenu():
         if choice == 2:
             compileProject()
         if choice == 3:
-            runSpreadsheetBuilder()
-        if choice == 4:
             pass
+        if choice == 4:
+            runSpreadsheetBuilder()
         if choice == 5:
             runClutterbox()
         if choice == 6:
