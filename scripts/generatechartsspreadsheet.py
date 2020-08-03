@@ -138,9 +138,8 @@ rici_generation_rates = [imageCount / rici_generation_times[index] for index, im
 si_generation_rates = [imageCount / si_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
 sc_generation_rates = [imageCount / sc_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
 quicci_generation_rates = [imageCount / quicci_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
-fpfh_generation_rates = [imageCount
-                         #imageCount / fpfh_generation_times[index]
-                         #if isinstance(fpfh_generation_times[index], float) else ' '
+fpfh_generation_rates = [imageCount / fpfh_generation_times[index]
+                         if isinstance(fpfh_generation_times[index], float) else ' '
                          for index, imageCount in enumerate(scene_image_counts_5_objects[0:-1] + fpfh_specific_scene_image_counts_5_objects)]
 
 writeColumn(generationRateSheet, triangle_counts_5_objects + fpfh_specific_triangle_counts_5_objects, 0, 1, 1528)
