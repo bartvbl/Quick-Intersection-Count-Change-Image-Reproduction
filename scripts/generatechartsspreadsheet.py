@@ -127,7 +127,9 @@ sc_generation_times = readColumn(master_spreadsheet.sheet_by_name('3DSC Generati
 quicci_generation_times = readColumn(master_spreadsheet.sheet_by_name('QUICCI Generation Times'), 7, 1, 1500)
 fpfh_generation_times = readColumn(master_spreadsheet.sheet_by_name('FPFH Generation Times'), 10, 1, 1528)
 
-scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 1, 1, 1500)
+scene_image_counts_5_objects_all = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 1, 1, 1500) + \
+                                   readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 10, 1501, 1528)
+scene_image_counts_5_objects = scene_image_counts_5_objects_all[0:1500]
 triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 1, 1, 1500)
 
 fpfh_specific_scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 10, 1500, 1528)
@@ -159,7 +161,9 @@ comparisonRateHeaders = \
      'RICI without early exit',
      'RICI with early exit',
      'SI',
-     '3DSC']
+     '3DSC',
+     'QUICCI',
+     'FPFH']
 
 for i in range(0, len(comparisonRateHeaders)):
     comparisonRateSheet.write(0, i, comparisonRateHeaders[i])
@@ -168,14 +172,18 @@ writeColumn(comparisonRateSheet, [x for x in range(1, 1501)], 0, 1, 1500)
 
 # Compute total number of comparisons done
 # Equal to number of needle images times the number of haystack images
-reference_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Reference Image Count'), 1, 1, 1500)
-comparison_counts_5_objects = [reference_image_counts_5_objects[index] * scene_image_counts_5_objects[index]
-                               for index in range(0, len(reference_image_counts_5_objects))]
+reference_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Reference Image Count'), 1, 1, 1500) + \
+                                   readColumn(master_spreadsheet.sheet_by_name('Reference Image Count'), 10, 1501, 1528)
+comparison_counts_5_objects_all = [reference_image_counts_5_objects[index] * scene_image_counts_5_objects_all[index]
+                                   for index in range(0, len(reference_image_counts_5_objects))]
+comparison_counts_5_objects = comparison_counts_5_objects_all[0:1500]
 
 rici_noearlyexit_comparison_times = readColumn(master_spreadsheet.sheet_by_name('RICI Comparison Times'), 1, 1, 1500)
 rici_earlyexit_comparison_times = readColumn(master_spreadsheet.sheet_by_name('RICI Comparison Times'), 2, 1, 1500)
 si_comparison_times = readColumn(master_spreadsheet.sheet_by_name('SI Comparison Times'), 16, 1, 1500)
 sc_comparison_times = readColumn(master_spreadsheet.sheet_by_name('3DSC Comparison Times'), 4, 1, 1500)
+quicci_comparison_times = readColumn(master_spreadsheet.sheet_by_name('QUICCI Comparison Times'), 7, 1, 1500)
+fpfh_comparison_times = readColumn(master_spreadsheet.sheet_by_name('FPFH Comparison Times'), 10, 1, 1528)
 
 # Comparison rate is comparisons / time taken
 rici_noearlyexit_comparison_rates = [comparison_counts_5_objects[index] / rici_noearlyexit_comparison_times[index]
@@ -186,17 +194,27 @@ si_comparison_rates = [comparison_counts_5_objects[index] / si_comparison_times[
                        for index in range(0, len(comparison_counts_5_objects))]
 sc_comparison_rates = [comparison_counts_5_objects[index] / sc_comparison_times[index]
                        for index in range(0, len(comparison_counts_5_objects))]
+quicci_comparison_rates = [comparison_counts_5_objects[index] / quicci_comparison_times[index]
+                           if quicci_comparison_times[index] != 0 else 0
+                           for index in range(0, len(comparison_counts_5_objects))]
+fpfh_comparison_rates = [comparison_counts_5_objects_all[index] / fpfh_comparison_times[index]
+                         if isinstance(fpfh_comparison_times[index], float) else float('inf')
+                         for index in range(0, len(comparison_counts_5_objects_all))]
 
 # Next, we sort the comparison rates for readability
 rici_noearlyexit_comparison_rates.sort()
 rici_earlyexit_comparison_rates.sort()
 si_comparison_rates.sort()
 sc_comparison_rates.sort()
+quicci_comparison_rates.sort()
+fpfh_comparison_rates.sort()
 
 writeColumn(comparisonRateSheet, rici_noearlyexit_comparison_rates, 1, 1, 1500)
 writeColumn(comparisonRateSheet, rici_earlyexit_comparison_rates, 2, 1, 1500)
 writeColumn(comparisonRateSheet, si_comparison_rates, 3, 1, 1500)
 writeColumn(comparisonRateSheet, sc_comparison_rates, 4, 1, 1500)
+writeColumn(comparisonRateSheet, quicci_comparison_rates, 5, 1, 1500)
+writeColumn(comparisonRateSheet, fpfh_comparison_rates[0:500], 6, 1, 1500, step=3)
 
 print('Writing output file..')
 
