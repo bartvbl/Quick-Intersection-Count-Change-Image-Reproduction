@@ -292,6 +292,25 @@ def loadOutputFileDirectory(path):
                 if file not in ignoredLists[method]:
                     ignoredLists[method].append(file)
 
+            # Save a lot of RAM by throwing away histogram data we don't need
+            histogramsString = methods[method]['namePrefixInJSONFile'] + 'histograms'
+            for sampleCountIndex, sampleObjectCount in enumerate(fileContents['sampleObjectCounts']):
+                indexNameString = str(fileContents['sampleObjectCounts'][sampleCountIndex]) + ' objects'
+
+                smallerHistogram = {}
+                countThreshold = 12
+                if histogramsString in fileContents:
+                    if str(sampleCountIndex) in fileContents[histogramsString]:
+                        for x in range(0, countThreshold):
+                            if str(x) in fileContents[histogramsString][str(sampleCountIndex)]:
+                                smallerHistogram[str(x)] = fileContents[histogramsString][str(sampleCountIndex)][str(x)]
+                        fileContents[histogramsString][str(sampleCountIndex)] = smallerHistogram
+                    else:
+                        for x in range(0, countThreshold):
+                            if str(x) in fileContents[histogramsString][indexNameString]:
+                                smallerHistogram[str(x)] = fileContents[histogramsString][indexNameString][str(x)]
+                        fileContents[histogramsString][indexNameString] = smallerHistogram
+
             # Beauty checks
             if file not in ignoredLists[method] and allResultsInvalid[method]:
                 ignoredLists[method].append(file)

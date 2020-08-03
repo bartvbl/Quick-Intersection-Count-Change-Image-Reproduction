@@ -97,7 +97,7 @@ def compileProject():
             return
 
 def runSpreadsheetBuilder():
-    if ask_for_confirmation('The spreadsheet construction script will consume around 16GB of RAM.\nYou should close any applications to ensure you do not run out of memory.\nContinue?'):
+    if ask_for_confirmation('The spreadsheet construction script will consume around 9GB of RAM.\nYou should close any applications to ensure you do not run out of memory.\nContinue?'):
         print()
         run_command_line_command('python3 compileresultfiles.py', 'scripts/')
         print()
