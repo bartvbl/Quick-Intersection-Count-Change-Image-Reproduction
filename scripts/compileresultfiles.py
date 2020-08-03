@@ -103,6 +103,8 @@ fileMapLocation = '../output/filemap.json'
 with open('../res/seeds_used_to_create_charts.txt') as seedFile:
     seedsUsedToCreateCharts = [str(x).strip() for x in seedFile.readlines()]
 
+with open('../res/seeds_used_for_fpfh.txt') as seedFile:
+    fpfhSeeds = [str(x).strip() for x in seedFile.readlines()]
 
 # Map of methods contained in the output files
 methods = {
@@ -575,6 +577,9 @@ if removeSeedsWithMissingEntries:
     for missingSeed in missingSeeds:
         for directory in loadedResults:
             for method in methods:
+                # FPFH seeds will be treated separately, so we don't remove them here
+                if method == 'FPFH':
+                    continue
                 if missingSeed in loadedResults[directory]['results'][methods[method]['namePrefixInJSONFile']]:
                     del loadedResults[directory]['results'][methods[method]['namePrefixInJSONFile']][missingSeed]
         if missingSeed in seedList:
@@ -802,7 +807,8 @@ for directoryIndex, directory in enumerate(inputDirectories.keys()):
     experimentSheet.write(directoryIndex + 1, len(allColumns) + 1, cluster)
     for columnIndex, method in enumerate(methods):
         experimentSheet.write(directoryIndex + 1, len(allColumns) + columnIndex + 2,
-              len([x for x in result['results'][methods[method]['namePrefixInJSONFile']] if x in seedList]))
+              len([x for x in result['results'][methods[method]['namePrefixInJSONFile']] if x in seedList]) if method != 'FPFH'
+                else len(fpfhSeeds) if len([x for x in result['results'][methods[method]['namePrefixInJSONFile']] if x in seedList]) != 0 else 0)
 
 # Sheets
 sheets = {}
@@ -821,6 +827,10 @@ vertexCountSheet = book.add_sheet("Reference Image Count")
 totalVertexCountSheet = book.add_sheet("Total Image Count")
 totalTriangleCountSheet = book.add_sheet("Total Triangle Count")
 
+
+# alter seedlist to also include additional FPFH ones
+baseSeedList = seedList
+seedList = seedList + [x for x in fpfhSeeds if not x in seedList]
 
 # Write initial columns
 
@@ -875,7 +885,13 @@ for directoryIndex, directory in enumerate(inputDirectories.keys()):
                 totalTriangleCountSheet.write(0, currentColumn + sampleCountIndex, columnHeader)
 
         for seedIndex, seed in enumerate(seedList):
-            if seed in resultSet['results'][methods[method]['namePrefixInJSONFile']]:
+            # Write result into the dump file if:
+            # - It exists in the method's set of results at all
+            # - If it appears in the inclusion list of FPFH seeds, if it is an FPFH result
+            # - If it appears in the inclusion list of regular seeds, if it is not an FPFH result
+            if seed in resultSet['results'][methods[method]['namePrefixInJSONFile']] \
+                    and (method != 'FPFH' or seed in fpfhSeeds)\
+                    and (method == 'FPFH' or seed in baseSeedList):
                 for sampleCountIndex, sampleObjectCount in enumerate(resultSet['settings']['sampleObjectCounts']):
 
                     # Top 1 performance
