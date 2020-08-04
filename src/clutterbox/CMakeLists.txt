@@ -116,5 +116,12 @@ target_link_libraries (${PROJECT_NAME} ${CUDA_LIBRARY} cuda cudart SpinImage cud
 add_executable(clutterEstimator ${CLUTTER_ESTIMATOR_SOURCES} ${CLUTTER_EXPERIMENT_SOURCES})
 target_link_libraries(clutterEstimator ${CUDA_LIBRARY} cuda cudart SpinImage cudadevrt)
 
-add_executable(projectionBenchmark tools/projectionBenchmark/compare.cpp)
-target_link_libraries(projectionBenchmark ${PCL_LIBRARIES})
+add_executable(quicciDistanceFunctionBenchmark
+        tools/quicciDistanceFunctionComparison/main.cpp
+        tools/quicciDistanceFunctionComparison/quicciDistanceFunctionBenchmark.cpp
+        tools/quicciDistanceFunctionComparison/clutterSphereMeshAugmenter.cpp
+        src/utilities/randomFileSelector.cpp
+        src/utilities/listDir.cpp
+        src/utilities/stringUtils.cpp
+        src/experiments/clutterBox/clutterBoxUtilities.cpp)
+target_link_libraries(quicciDistanceFunctionBenchmark SpinImage)

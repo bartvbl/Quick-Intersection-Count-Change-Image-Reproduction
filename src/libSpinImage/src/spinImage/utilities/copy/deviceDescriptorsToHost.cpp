@@ -30,7 +30,7 @@ SpinImage::array<spinImagePixelType> SpinImage::copy::spinImageDescriptorsToHost
     return host_descriptors;
 }
 
-SpinImage::cpu::QUICCIImages SpinImage::copy::QUICCIDescriptorsToHost(SpinImage::cpu::QUICCIImages device_descriptors) {
+SpinImage::cpu::QUICCIImages SpinImage::copy::QUICCIDescriptorsToHost(SpinImage::gpu::QUICCIImages device_descriptors) {
     size_t descriptorBufferLength = device_descriptors.imageCount;
     size_t descriptorBufferSize = descriptorBufferLength * sizeof(QuiccImage);
 

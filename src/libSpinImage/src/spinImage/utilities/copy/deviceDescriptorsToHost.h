@@ -3,6 +3,7 @@
 #include <spinImage/common/types/array.h>
 #include <spinImage/libraryBuildSettings.h>
 #include <spinImage/cpu/types/QUICCIImages.h>
+#include <spinImage/gpu/types/QUICCImages.h>
 
 namespace SpinImage {
     namespace copy {
@@ -13,6 +14,6 @@ namespace SpinImage {
         spinImageDescriptorsToHost(array<spinImagePixelType> device_descriptors, size_t imageCount);
 
         SpinImage::cpu::QUICCIImages
-        QUICCIDescriptorsToHost(SpinImage::cpu::QUICCIImages descriptors);
+        QUICCIDescriptorsToHost(SpinImage::gpu::QUICCIImages descriptors);
     }
 }
