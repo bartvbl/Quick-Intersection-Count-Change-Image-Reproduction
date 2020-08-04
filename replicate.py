@@ -350,6 +350,23 @@ def runClutterEstimation():
             activeObjectCounts.sort()
             return
 
+def runSofaScene():
+    os.makedirs('output/figure12/')
+    run_command_line_command('src/clutterbox/build/quicciDistanceFunctionBenchmark '
+                             '--source-directory=input/SHREC17/ '
+                             '--force-seed=3456690118 '
+                             '--support-radius=0.3 '
+                             '--output-directory=output/figure12/ '
+                             '--sphere-counts=500 '
+                             '--experiment-mode=similar '
+                             '--clutter-sphere-radius=0.05 '
+                             '--scene-sphere-count=500 '
+                             '--enable-obj-dump')
+    print()
+    print('Complete.')
+    print('You can find the produced OBJ file here:')
+    print('    output/figure12/scene_similar_3456690118_500_spheres.obj')
+
 def runMainMenu():
     main_menu = TerminalMenu([
         "1. Install dependencies",
@@ -358,7 +375,7 @@ def runMainMenu():
         "4. Run Hamming Tree Evaluation (Figure 7)",
         "5. Compile author generated results into spreadsheets (Figures 8-11)",
         "6. Run Clutterbox experiment (used for Figures 8-11)",
-        "7. Run Clutter fraction estimation (used for Figures 8-11)",
+        "7. Run Clutter fraction estimation (used for Figure 9)",
         "8. Render scene shown in Figure 12",
         "9. Run Evaluation of Distance Functions (Figure 13)",
         "10. exit"], title='---------------------- Main Menu ----------------------')
@@ -381,7 +398,7 @@ def runMainMenu():
         if choice == 6:
             runClutterEstimation()
         if choice == 7:
-            pass
+            runSofaScene()
         if choice == 8:
             pass
         if choice == 9:
