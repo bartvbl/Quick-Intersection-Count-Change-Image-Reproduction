@@ -164,6 +164,7 @@ def runHammingTreeEvaluation():
             "Render QUICCI images",
             "Compute index over computed images",
             "Benchmark query times",
+            "Compile query times computed by authors into spreadsheet (Figure 7)",
             "back"], title='------- Hamming Tree Evaluation -------')
         choice = run_menu.show()
         if choice == 0:
@@ -204,6 +205,10 @@ def runHammingTreeEvaluation():
                                      '--query-quicci-dump-directory="' + quicciDumpDir + '" '
                                      '')
         if choice == 3:
+            print()
+            run_command_line_command('python3 analyseQueryTimes.py', 'scripts/')
+            print()
+        if choice == 4:
             return
 
 def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0, sceneOBJDumpDirectory = None):
