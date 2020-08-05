@@ -75,11 +75,43 @@ print()
 print('Total number of baseline images:', baselineTotalImageCount)
 # 176,225,136
 
-np.savetxt(baselineWeightedHammingDumpFile, baselineWeightedHammingHistogram, delimiter=',')
-np.savetxt(baselineClutterResistantDumpFile, baselineClutterResistantHistogram, delimiter=',')
-np.savetxt(baselineHammingDumpFile, baselineHammingHistogram, delimiter=',')
+print()
+print('Writing spreadsheet..')
 
-print('Statistics written to disk.')
+book = xlwt.Workbook(encoding="utf-8")
+
+resultsSheet = book.add_sheet('nominal_charts')
+
+# Write headers
+resultsSheet.write(0, 0, 'Clutter Resistant')
+resultsSheet.write(1, 0, 'Distance Value')
+resultsSheet.write(1, 1, 'Occurrence Count')
+
+resultsSheet.write(0, 3, 'Weighted Hamming')
+resultsSheet.write(1, 3, 'Distance Value')
+resultsSheet.write(1, 4, 'Occurrence Count')
+
+resultsSheet.write(0, 6, 'Hamming')
+resultsSheet.write(1, 6, 'Distance Value')
+resultsSheet.write(1, 7, 'Occurrence Count')
+
+# Write distance function distances
+for row in range(0, maxDistance):
+    resultsSheet.write(row + 2, 0, row)
+    resultsSheet.write(row + 2, 1, baselineClutterResistantHistogram[row].item())
+
+    resultsSheet.write(2 * row + 0 + 2, 3, 2 * row + 0)
+    resultsSheet.write(2 * row + 0 + 2, 4, baselineWeightedHammingHistogram[2 * row + 0].item())
+    resultsSheet.write(2 * row + 1 + 2, 3, 2 * row + 1)
+    resultsSheet.write(2 * row + 1 + 2, 4, baselineWeightedHammingHistogram[2 * row + 1].item())
+
+    resultsSheet.write(row + 2, 6, row)
+    resultsSheet.write(row + 2, 7, baselineHammingHistogram[row].item())
+
+book.save(outfile)
+
+
+print('Spreadsheet with nominal histograms has been written to:', outfile[3:])
 print()
 
 sphereClutterTotalImageCount = 0
@@ -219,34 +251,6 @@ cbar.ax.set_yticklabels(colorbar_ticks_strings)
 cbar.set_label('Sample count', rotation=90)
 
 plot.show()
-
-print()
-print('Writing spreadsheet..')
-
-book = xlwt.Workbook(encoding="utf-8")
-
-resultsSheet = book.add_sheet('results')
-
-# Write header
-resultsSheet.write(0, 0, 'Index')
-resultsSheet.write(0, 1, 'Seed')
-resultsSheet.write(0, 2, 'Image count')
-for sphereCountIndex, sphereCount in enumerate(sphereCounts):
-    resultsSheet.write(0, 3 + sphereCountIndex, str(sphereCount) + ' spheres')
-    resultsSheet.write(0, 3 + sphereCountIndex + len(sphereCounts), str(sphereCount) + ' spheres')
-    resultsSheet.write(0, 3 + sphereCountIndex + 2 * len(sphereCounts), str(sphereCount) + ' spheres')
-
-for seedIndex, seed in enumerate(seedList):
-    resultsSheet.write(seedIndex + 1, 0, seedIndex + 1)
-    resultsSheet.write(seedIndex + 1, 1, seed)
-    resultsSheet.write(seedIndex + 1, 2, imageCountList[seedIndex])
-
-    for sphereCountIndex, sphereCount in enumerate(sphereCounts):
-        resultsSheet.write(seedIndex + 1, 3 + sphereCountIndex, resultMap['clutterResistant'][str(sphereCount)][seedIndex])
-        resultsSheet.write(seedIndex + 1, 3 + sphereCountIndex + len(sphereCounts), resultMap['weightedHamming'][str(sphereCount)][seedIndex])
-        resultsSheet.write(seedIndex + 1, 3 + sphereCountIndex + 2 * len(sphereCounts), resultMap['hamming'][str(sphereCount)][seedIndex])
-
-book.save(outfile)
 
 print('Complete.')
 
