@@ -393,6 +393,21 @@ def runSofaScene():
     print('    output/figure12/scene_similar_3456690118_500_spheres.obj')
     print()
 
+def runDistanceFunctionEvaluation():
+    while True:
+        distanceFunctionEvaluation_menu = TerminalMenu([
+            "Compute baseline result selected at random",
+            "Compute baseline result with specific index",
+            "Compute similar result selected at random",
+            "Compute similar result with specific index",
+            "Compile results computed by authors into heatmaps and charts shown in Figure 13",
+            "back"], title='------------ Run Distance Functions Evaluation ------------')
+        choice = distanceFunctionEvaluation_menu.show()
+        if choice == 4:
+            run_command_line_command('python3 buildDistanceFunctionsSpreadsheet.py', 'scripts/')
+        if choice == 3:
+            return
+
 def runMainMenu():
     main_menu = TerminalMenu([
         "1. Install dependencies",
@@ -426,7 +441,7 @@ def runMainMenu():
         if choice == 7:
             runSofaScene()
         if choice == 8:
-            pass
+            runDistanceFunctionEvaluation()
         if choice == 9:
             return
 
