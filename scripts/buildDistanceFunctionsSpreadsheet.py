@@ -18,7 +18,7 @@ from PIL import Image
 inputDirectory = '../input/distances_computed_by_authors/run12_quicci_distance_functions_rerun/output/'
 baselineDirectory = '../input/distances_computed_by_authors/run14_quicci_distance_functions_baseline/'
 
-outfile = '../output/distance_function_evaluation/distance_functions_results.xls'
+outfile = '../output/distance_function_evaluation/nominal_distance_function_result_histograms.xls'
 baselineWeightedHammingDumpFile = '../output/distance_function_evaluation/weighted_hamming_distance_function_baseline.txt'
 baselineHammingDumpFile = '../output/distance_function_evaluation/hamming_distance_function_baseline.txt'
 baselineClutterResistantDumpFile = '../output/distance_function_evaluation/clutter_resistant_distance_function_baseline.txt'

@@ -148,6 +148,64 @@ clutterSeedToFileMap = None
 
 
 
+def runHammingTreeEvaluation():
+    quicciDumpDir = 'output/hamming_tree/quicci_images'
+    indexTreeDir = 'output/hamming_tree/hamming_tree'
+    indexRootDir = 'output/hamming_tree'
+
+    os.makedirs(quicciDumpDir, exist_ok=True)
+    os.makedirs(indexTreeDir, exist_ok=True)
+
+    shrecDir = 'input/SHREC17/'
+    OBJFiles = os.listdir(shrecDir)
+
+    while True:
+        run_menu = TerminalMenu([
+            "Render QUICCI images",
+            "Compute index over computed images",
+            "Benchmark query times",
+            "back"], title='------- Hamming Tree Evaluation -------')
+        choice = run_menu.show()
+        if choice == 0:
+            print()
+            objectCount = int(input('How many objects would you like to render images for? '))
+            startIndex = random.randint(0, len(OBJFiles) - objectCount)
+            for objectIndex in range(startIndex, startIndex + objectCount):
+                inFileName = OBJFiles[objectIndex]
+                outFileName = inFileName.replace('.obj', '.dat')
+                print()
+                print('Rendering images for object', str(objectIndex - startIndex + 1) + '/' + str(objectCount) + ':', inFileName)
+                run_command_line_command('src/clutterbox/build/libSpinImage/quiccidumper '
+                                         '--input-obj-file="' + os.path.join(shrecDir, inFileName) + '" '
+                                         '--output-dump-file="' + os.path.join(quicciDumpDir, outFileName) + '" '
+                                         '--fit-object-in-unit-sphere '
+                                         '--spin-image-width=0.3')
+        if choice == 1:
+            print('Removing any pre-existing index tree..')
+            run_command_line_command('rm -rf ' + indexTreeDir + '/*')
+            print()
+            imageDumpFileCount = len(os.listdir(quicciDumpDir))
+            run_command_line_command('src/clutterbox/build/libSpinImage/buildindex '
+                                     '--index-directory="' + indexTreeDir + '" '
+                                     '--quicci-dump-directory="' + quicciDumpDir + '" '
+                                     '--runtime-json-file="' + indexRootDir + '" '
+                                     '--from-file-index=0 '
+                                     '--to-file-index=' + str(imageDumpFileCount) + ' '
+                                     '--cache-node-limit=100000 '
+                                     '--cache-image-limit=10000000')
+            print()
+            print('Index has been written to:', indexTreeDir)
+            print()
+        if choice == 2:
+            print()
+            run_command_line_command('src/clutterbox/build/libSpinImage/benchmarkindex '
+                                     '--index-directory="' + indexTreeDir + '" '
+                                     '--index-quicci-dump-directory="' + quicciDumpDir + '" '
+                                     '--query-quicci-dump-directory="' + quicciDumpDir + '" '
+                                     '')
+        if choice == 3:
+            return
+
 def executeClutterboxExperiment(randomSeed, matchVisualisationDirectory = None, matchVisualisationThreshold = 0, sceneOBJDumpDirectory = None):
     os.makedirs('output/clutterbox_results', exist_ok=True)
     visualisationParameters = ''
@@ -483,7 +541,7 @@ def runMainMenu():
         if choice == 2:
             compileProject()
         if choice == 3:
-            pass
+            runHammingTreeEvaluation()
         if choice == 4:
             runSpreadsheetBuilder()
         if choice == 5:
