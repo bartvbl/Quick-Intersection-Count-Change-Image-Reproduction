@@ -7,7 +7,9 @@ This repository contains:
 
 ## Instructions
 
-You can run the script by running:
+You only need to have python 3 installed, which comes with Ubuntu. Any dependencies needed by the project itself can be installed using the menu system in the script itself.
+
+You can run the script by executing:
 
 ```bash
 
@@ -29,7 +31,7 @@ Type | Requirements
 -----|----------------------------------------------------------------------------
 CPU  | Does not matter
 RAM  | At least 32GB
-Disk | Must have about ~70GB of storage available to store the downloaded datasets
+Disk | Must have about ~120GB of storage available to store the downloaded datasets
 GPU  | Any NVIDIA GPU (project uses CUDA)
 OS   | Ubuntu 16 or higher. Project has been tested on 18 and 20.
 
