@@ -61,6 +61,8 @@ int main(int argc, const char **argv)
 
 	// First, we create a CUDA context on the best compute device.
 	// This is naturally the device with most memory available, becausewhywouldntit.
+
+	std::cout << std::endl;
 	
 	cudaDeviceProp device_information = setCurrentCUDADevice(listGPUs.value(), forceGPU.value());
 	GPUMetaData gpuMetaData;

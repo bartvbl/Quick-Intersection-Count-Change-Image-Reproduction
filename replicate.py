@@ -376,36 +376,88 @@ def runClutterEstimation():
             activeObjectCounts.sort()
             return
 
-def runSofaScene():
-    os.makedirs('output/figure12/', exist_ok=True)
+def runDistanceFunctionBenchmark(seed, outputDirectory, sphereCounts, mode, correspondingFile = None, enableOBJDump = False):
     run_command_line_command('src/clutterbox/build/quicciDistanceFunctionBenchmark '
                              '--source-directory=input/SHREC17/ '
-                             '--force-seed=3456690118 '
+                             '--force-seed=' + seed + ' '
                              '--support-radius=0.3 '
-                             '--output-directory=output/figure12/ '
-                             '--sphere-counts=500 '
-                             '--experiment-mode=similar '
+                             '--output-directory=' + outputDirectory + ' '
+                             '--sphere-counts=' + ','.join(sphereCounts) + ' '
+                             '--experiment-mode=' + mode + ' '
                              '--clutter-sphere-radius=0.05 '
                              '--scene-sphere-count=500 '
-                             '--enable-obj-dump')
+                             + ('--enable-obj-dump' if enableOBJDump else ''))
+    print()
+    if(correspondingFile is not None):
+        print('You should compare the above results to the following file computed by the authors:')
+        print('   ', correspondingFile)
+
+def runSofaScene():
+    os.makedirs('output/figure12/', exist_ok=True)
+    runDistanceFunctionBenchmark('3456690118', 'output/figure12/', ['500'], 'similar', None, True)
     print()
     print('You can find the produced OBJ file here:')
     print('    output/figure12/scene_similar_3456690118_500_spheres.obj')
     print()
 
 def runDistanceFunctionEvaluation():
+    similarDistanceSeedFileMap = {}
+    baselineDistanceSeedFileMap = {}
+
+    similarSeedList = []
+    baselineSeedList = []
+
+    os.makedirs('output/distance_function_evaluation/nominal', exist_ok=True)
+    os.makedirs('output/distance_function_evaluation/similar', exist_ok=True)
+
+    if not os.path.isdir('input/distances_computed_by_authors'):
+        print('Warning: The distance function values dataset appears to be missing.')
+        print('Please download it before trying to replicate them.')
+    else:
+        similarSeedDirectory = 'input/distances_computed_by_authors/run12_quicci_distance_functions_rerun/output'
+        for file in os.listdir(similarSeedDirectory):
+            seed = file.split('.')[0].split('_')[3]
+            similarDistanceSeedFileMap[seed] = os.path.join(similarSeedDirectory, file)
+            similarSeedList.append(seed)
+        baselineSeedDirectory = 'input/distances_computed_by_authors/run14_quicci_distance_functions_baseline'
+        for file in os.listdir(baselineSeedDirectory):
+            seed = file.split('.')[0].split('_')[3]
+            baselineDistanceSeedFileMap[seed] = os.path.join(baselineSeedDirectory, file)
+            baselineSeedList.append(seed)
+
     while True:
         distanceFunctionEvaluation_menu = TerminalMenu([
-            "Compute baseline result selected at random",
-            "Compute baseline result with specific index",
-            "Compute similar result selected at random",
-            "Compute similar result with specific index",
+            "Compute 'nominal' result selected at random",
+            "Compute 'nominal' result with specific index",
+            "Compute 'similar' result selected at random",
+            "Compute 'similar' result with specific index",
             "Compile results computed by authors into heatmaps and charts shown in Figure 13",
             "back"], title='------------ Run Distance Functions Evaluation ------------')
         choice = distanceFunctionEvaluation_menu.show()
+        if choice == 0:
+            chosenSeed = random.choice(baselineSeedList)
+            runDistanceFunctionBenchmark(chosenSeed, 'output/distance_function_evaluation/nominal', ['0'], 'baseline', baselineDistanceSeedFileMap[chosenSeed])
+            print()
+        if choice == 1:
+            chosenSeedIndex = input('Specify the index of the random seed to use (must be between 0 and ' + str(len(baselineSeedList)) + '): ')
+            chosenSeed = baselineSeedList[int(chosenSeedIndex)]
+            runDistanceFunctionBenchmark(chosenSeed, 'output/distance_function_evaluation/nominal', ['0'], 'baseline', baselineDistanceSeedFileMap[chosenSeed])
+            print()
+        if choice == 2:
+            chosenSeed = random.choice(similarSeedList)
+            runDistanceFunctionBenchmark(chosenSeed, 'output/distance_function_evaluation/similar',
+                                         [str(x) for x in range(0, 510, 10)], 'similar', similarDistanceSeedFileMap[chosenSeed])
+            print()
+        if choice == 3:
+            chosenSeedIndex = input('Specify the index of the random seed to use (must be between 0 and ' + str(len(similarSeedList)) + '): ')
+            chosenSeed = similarSeedList[int(chosenSeedIndex)]
+            runDistanceFunctionBenchmark(chosenSeed, 'output/distance_function_evaluation/similar',
+                                         [str(x) for x in range(0, 510, 10)], 'similar', similarDistanceSeedFileMap[chosenSeed])
+            print()
         if choice == 4:
             run_command_line_command('python3 buildDistanceFunctionsSpreadsheet.py', 'scripts/')
-        if choice == 3:
+            print()
+        if choice == 5:
             return
 
 def runMainMenu():

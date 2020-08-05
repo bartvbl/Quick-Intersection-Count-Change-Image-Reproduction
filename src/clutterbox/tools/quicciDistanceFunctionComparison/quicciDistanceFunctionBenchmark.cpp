@@ -188,11 +188,13 @@ void runQuicciDistanceFunctionBenchmark(
         measuredDistances.push_back(sampleDistances);
     }
 
-    std::cout << "Experiments done, dumping results.." << std::endl;
-
     std::string timestring = getCurrentDateTimeString();
     std::string outputFileName = "quicciDistances_" + timestring + "_" + std::to_string(randomSeed) + ".json";
     std::experimental::filesystem::path outputFilePath =  outputDirectory / outputFileName;
+
+    std::cout << std::endl;
+    std::cout << "Experiments done, dumping results to file: " << std::endl;
+    std::cout << "    " << outputFilePath.string() << std::endl;
 
     json outJson;
 
