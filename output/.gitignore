@@ -1,3 +1,5 @@
 clutterbox_results/*
 estimated_clutter/*
-highlightedobjects/*
+distance_function_evaluation/*
+hamming_tree/*
+figure12/*
