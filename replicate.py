@@ -208,6 +208,10 @@ def runHammingTreeEvaluation():
             print()
             run_command_line_command('python3 analyseQueryTimes.py', 'scripts/')
             print()
+            print('Done.')
+            print()
+            print('Results have been written to: output/figure_7_query_times.csv')
+            print()
         if choice == 4:
             return
 

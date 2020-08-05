@@ -20,7 +20,7 @@ counts = [0] * 4096
 sums = [0] * 4096
 
 with open('../output/figure_7_query_times.csv', 'w') as outFile:
-    outFile.write('Index, End time, Counts\n')
+    outFile.write('Index, End time\n') # , Counts
     for i in range(0, len(results)):
         for row in range(0, 4096):
             value = results[i]['indexedQueryResults']['distanceTimes'][row]
@@ -30,4 +30,4 @@ with open('../output/figure_7_query_times.csv', 'w') as outFile:
     for i in range(0, 4096):
         if counts[i] == 0:
             continue
-        outFile.write(str(i) + ', ' + str(float(sums[i]) / float(counts[i])) + ', ' + str(counts[i]) + '\n')
+        outFile.write(str(i) + ', ' + str(float(sums[i]) / float(counts[i])) + '\n') #  + ', ' + str(counts[i])
