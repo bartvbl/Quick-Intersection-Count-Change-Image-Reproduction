@@ -132,8 +132,8 @@ scene_image_counts_5_objects_all = readColumn(master_spreadsheet.sheet_by_name('
 scene_image_counts_5_objects = scene_image_counts_5_objects_all[0:1500]
 triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 1, 1, 1500)
 
-fpfh_specific_scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 10, 1500, 1528)
-fpfh_specific_triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 10, 1500, 1528)
+fpfh_specific_scene_image_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Image Count'), 10, 1501, 1528)
+fpfh_specific_triangle_counts_5_objects = readColumn(master_spreadsheet.sheet_by_name('Total Triangle Count'), 10, 1501, 1528)
 
 # Generation rate is image count / time taken -> images / second
 rici_generation_rates = [imageCount / rici_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
@@ -142,7 +142,7 @@ sc_generation_rates = [imageCount / sc_generation_times[index] for index, imageC
 quicci_generation_rates = [imageCount / quicci_generation_times[index] for index, imageCount in enumerate(scene_image_counts_5_objects)]
 fpfh_generation_rates = [imageCount / fpfh_generation_times[index]
                          if isinstance(fpfh_generation_times[index], float) else ' '
-                         for index, imageCount in enumerate(scene_image_counts_5_objects[0:-1] + fpfh_specific_scene_image_counts_5_objects)]
+                         for index, imageCount in enumerate(scene_image_counts_5_objects + fpfh_specific_scene_image_counts_5_objects)]
 
 writeColumn(generationRateSheet, triangle_counts_5_objects + fpfh_specific_triangle_counts_5_objects, 0, 1, 1528)
 writeColumn(generationRateSheet, rici_generation_rates, 1, 1, 1500)
