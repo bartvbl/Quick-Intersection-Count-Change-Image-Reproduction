@@ -45,7 +45,7 @@ def downloadDatasetsMenu():
             print()
             if not os.path.isfile('input/download/results_computed_by_authors_quicci_fpfh.7z') or ask_for_confirmation('It appears the second results archive file has already been downloaded. Would you like to download it again?'):
                 print('Downloading results archive file..')
-                run_command_line_command('wget --output-document results_computed_by_authors_quicci_fpfh.7z https://data.mendeley.com/datasets/k9j5ymry29/2/files/50c14dc1-0514-491b-8aa1-d3a575f722c7/results_computed_by_authors_quicci_fpfh.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document results_computed_by_authors_quicci_fpfh.7z https://data.mendeley.com/datasets/k9j5ymry29/1/files/519b9cab-71a7-40fa-924e-10cf9b7905d7/results_computed_by_authors_quicci_and_fpfh.7z?dl=1', 'input/download/')
             print()
             run_command_line_command('p7zip -k -d download/results_computed_by_authors_quicci_fpfh.7z', 'input/')
 
