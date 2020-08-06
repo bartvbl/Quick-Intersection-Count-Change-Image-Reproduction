@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 #include <omp.h>
 #include <spinImage/utilities/fileutils.h>
 #include <spinImage/cpu/types/QUICCIImages.h>
@@ -41,7 +43,7 @@ float computeWeightedHammingDistance(const QuiccImage &needle, const QuiccImage 
     return score;
 }
 
-float computeHammingDistance(const QuiccImage &needle, const QuiccImage &haystack) {
+float computeHammingDistance_(const QuiccImage &needle, const QuiccImage &haystack) {
     // Wherever pixels don't match, we apply a penalty for each of them
     float score = 0;
     for(int i = 0; i < needle.size(); i++) {
@@ -52,7 +54,7 @@ float computeHammingDistance(const QuiccImage &needle, const QuiccImage &haystac
 }
 
 std::vector<SpinImage::index::QueryResult> SpinImage::index::sequentialQuery(std::experimental::filesystem::path dumpDirectory, const QuiccImage &queryImage, unsigned int resultCount, unsigned int fileStartIndex, unsigned int fileEndIndex, unsigned int threadCount, debug::QueryRunInfo* runInfo) {
-    std::pair<float, float> hammingWeights = computedWeightedHammingWeights(queryImage);
+    //std::pair<float, float> hammingWeights = computedWeightedHammingWeights(queryImage);
 
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
@@ -86,8 +88,8 @@ std::vector<SpinImage::index::QueryResult> SpinImage::index::sequentialQuery(std
             #pragma omp parallel for schedule(dynamic)
             for (IndexImageID imageIndex = 0; imageIndex < images.imageCount; imageIndex++) {
                 QuiccImage combinedImage = images.images[imageIndex];
-                float distanceScore = computeWeightedHammingDistance(queryImage, combinedImage, hammingWeights.first, hammingWeights.second);
-                //float distanceScore = computeHammingDistance(queryImage, combinedImage);
+                //float distanceScore = computeWeightedHammingDistance(queryImage, combinedImage, hammingWeights.first, hammingWeights.second);
+                float distanceScore = computeHammingDistance_(queryImage, combinedImage);
                 if(distanceScore < currentScoreThreshold || searchResults.size() < resultCount) {
                     searchResultLock.lock();
                     IndexEntry entry = {fileIndex, imageIndex};
@@ -119,13 +121,6 @@ std::vector<SpinImage::index::QueryResult> SpinImage::index::sequentialQuery(std
 
     std::vector<SpinImage::index::QueryResult> results(searchResults.begin(), searchResults.end());
 
-    /*for(int i = 0; i < resultCount; i++) {
-        std::cout << "Result " << i
-                  << ": score " << results.at(i).score
-                  << ", file " << results.at(i).entry.fileIndex
-                  << ", image " << results.at(i).entry.imageIndex << std::endl;
-    }*/
-
     if(runInfo != nullptr) {
         double queryTime = double(duration.count()) / 1000.0;
         runInfo->totalQueryTime = queryTime;
@@ -135,3 +130,4 @@ std::vector<SpinImage::index::QueryResult> SpinImage::index::sequentialQuery(std
 
     return results;
 }
+#pragma clang diagnostic pop

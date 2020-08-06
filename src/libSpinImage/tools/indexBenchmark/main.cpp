@@ -30,8 +30,8 @@ int main(int argc, const char** argv) {
             "index-quicci-dump-directory", "The directory containing QUICCI dump files from which the index was generated.", '\0', arrrgh::Required, "");
     const auto& queryImageDirectory = parser.add<std::string>(
             "query-quicci-dump-directory", "The directory containing QUICCI dump files from which the query image should be drawn.", '\0', arrrgh::Required, "");
-    const auto& outputJsonFile = parser.add<std::string>(
-            "timings-json-file", "A path to where a JSON file containing measurements should be written to.", '\0', arrrgh::Optional, "");
+    const auto& outputDirectory = parser.add<std::string>(
+            "output-directory", "A directory to where a JSON file containing measurements should be written to.", '\0', arrrgh::Optional, ".");
     const auto& overrideRandomSeed = parser.add<size_t>("random-seed", "Specify a random seed for the random number generator. The same seed used with the same index and dataset will yield the same results. Leaving this parameter unspecified will select a random seed.", '\0', arrrgh::Optional, 0);
 
     const auto& showHelp = parser.add<bool>(
@@ -89,35 +89,15 @@ int main(int argc, const char** argv) {
     const unsigned int resultCount = 750;
 
     std::cout << "Querying index.." << std::endl;
-    //std::vector<SpinImage::index::QueryResult> searchResults = SpinImage::index::query(index, chosenQueryImage, resultCount, &indexedRunInfo);
+    std::vector<SpinImage::index::QueryResult> searchResults = SpinImage::index::query(index, chosenQueryImage, resultCount, &indexedRunInfo);
 
-    std::cout << "Querying dataset sequentially (1 thread).." << std::endl;
+    std::cout << "Querying dataset sequentially.." << std::endl;
 
-    //std::vector<SpinImage::index::QueryResult> sequentialSearchResults = SpinImage::index::sequentialQuery(indexImageDirectory.value(), chosenQueryImage, resultCount, 0, 12500, 1, &sequentialSingleThreadedRunInfo);
-
-    std::cout << "Querying dataset sequentially (lots of threads).." << std::endl;
-
-    std::vector<SpinImage::index::QueryResult> sequentialParallelSearchResults = SpinImage::index::sequentialQuery(indexImageDirectory.value(), chosenQueryImage, resultCount, 0, 1250, 0, &sequentialParallelRunInfo);
-
+    std::vector<std::experimental::filesystem::path> imageIndexDirectoryContents = SpinImage::utilities::listDirectory(indexImageDirectory.value());
+    std::vector<SpinImage::index::QueryResult> sequentialSearchResults = SpinImage::index::sequentialQuery(indexImageDirectory.value(), chosenQueryImage, resultCount, 0, imageIndexDirectoryContents.size(), 1, &sequentialSingleThreadedRunInfo);
     std::cout << "Dumping results.." << std::endl;
-    SpinImage::cpu::QUICCIImages imageBuffer;
-    imageBuffer.images = new QuiccImage[std::max<unsigned int>(sequentialParallelSearchResults.size(), 1)];
-    imageBuffer.imageCount = std::max<unsigned int>(sequentialParallelSearchResults.size(), 1);
 
-    QuiccImage blankImage;
-    std::fill(blankImage.begin(), blankImage.end(), 0);
-    std::fill(imageBuffer.images, imageBuffer.images + std::max<unsigned int>(sequentialParallelSearchResults.size(), 1),
-              blankImage);
-
-    for(int searchResult = 0; searchResult < sequentialParallelSearchResults.size(); searchResult++) {
-        imageBuffer.images[searchResult] = sequentialParallelSearchResults.at(searchResult).image;
-    }
-    //imageBuffer.images[0] = chosenQueryImage;
-
-    SpinImage::dump::descriptors(imageBuffer, "searchResults_weighted_" + std::to_string(randomSeed) + ".png", 10);
-
-
-    std::string jsonPath = "queryTimes_" + std::to_string(randomSeed) + ".json";
+    std::experimental::filesystem::path jsonPath = std::experimental::filesystem::path(outputDirectory.value()) / ("queryTimes_" + std::to_string(randomSeed) + ".json");
     json outJson;
 
     outJson["version"] = "v3";
@@ -134,17 +114,15 @@ int main(int argc, const char** argv) {
     outJson["indexedQueryResults"]["threadCount"] = indexedRunInfo.threadCount;
     outJson["indexedQueryResults"]["distanceTimes"] = indexedRunInfo.distanceTimes;
 
-    /*outJson["sequentialSerialResults"] = {};
+    outJson["sequentialSerialResults"] = {};
     outJson["sequentialSerialResults"]["queryTime"] = sequentialSingleThreadedRunInfo.totalQueryTime;
     outJson["sequentialSerialResults"]["threadCount"] = sequentialSingleThreadedRunInfo.threadCount;
     outJson["sequentialSerialResults"]["distanceTimes"] = sequentialSingleThreadedRunInfo.distanceTimes;
 
-    outJson["sequentialParallelResults"] = {};
-    outJson["sequentialParallelResults"]["queryTime"] = sequentialParallelRunInfo.totalQueryTime;
-    outJson["sequentialParallelResults"]["threadCount"] = sequentialParallelRunInfo.threadCount;
-    outJson["sequentialParallelResults"]["distanceTimes"] = sequentialParallelRunInfo.distanceTimes;*/
+    std::ofstream outFile(jsonPath);
+    outFile << outJson.dump(4);
+    outFile.close();
 
-    //std::ofstream outFile(jsonPath);
-    //outFile << outJson.dump(4);
-    //outFile.close();
+    std::cout << std::endl << "Done." << std::endl << std::endl;
+    std::cout << "Query timings have been written to: " << jsonPath.string() << std::endl;
 }

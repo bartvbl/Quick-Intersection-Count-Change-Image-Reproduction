@@ -151,10 +151,12 @@ clutterSeedToFileMap = None
 def runHammingTreeEvaluation():
     quicciDumpDir = 'output/hamming_tree/quicci_images'
     indexTreeDir = 'output/hamming_tree/hamming_tree'
+    queryTimingsDir = 'output/hamming_tree/query_timings'
     indexRootDir = 'output/hamming_tree'
 
     os.makedirs(quicciDumpDir, exist_ok=True)
     os.makedirs(indexTreeDir, exist_ok=True)
+    os.makedirs(queryTimingsDir, exist_ok=True)
 
     shrecDir = 'input/SHREC17/'
     OBJFiles = os.listdir(shrecDir)
@@ -203,7 +205,9 @@ def runHammingTreeEvaluation():
                                      '--index-directory="' + indexTreeDir + '" '
                                      '--index-quicci-dump-directory="' + quicciDumpDir + '" '
                                      '--query-quicci-dump-directory="' + quicciDumpDir + '" '
-                                     '')
+                                     '--output-directory="' + queryTimingsDir + '" '
+                                     '--random-seed=0')
+            print()
         if choice == 3:
             print()
             run_command_line_command('python3 analyseQueryTimes.py', 'scripts/')
