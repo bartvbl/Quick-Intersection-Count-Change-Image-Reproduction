@@ -110,7 +110,7 @@ std::vector<SpinImage::index::QueryResult> SpinImage::index::sequentialQuery(std
                 malloc_trim(0);
             }
 
-            std::cout << "\rProcessing of file " << fileIndex + 1 << "/" << fileEndIndex << " complete. Current best score: " << currentScoreThreshold << "            " << std::flush;
+            std::cout << "\rProcessing of file " << fileIndex + 1 << "/" << fileEndIndex << " complete. Current score threshold: " << currentScoreThreshold << "            " << std::flush;
         }
     }
 
