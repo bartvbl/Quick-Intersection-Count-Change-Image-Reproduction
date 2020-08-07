@@ -253,4 +253,9 @@ cbar.set_label('Sample count', rotation=90)
 plot.show()
 
 print('Complete.')
+print()
+print('Press enter to continue.. (will close heatmap windows)')
+print()
+
+input()
 
