@@ -1,5 +1,17 @@
 # Source code repository for the paper "An Indexing Scheme and Descriptor for 3D Object Retrieval Based on Local Shape Querying"
 
+-----
+
+### Notice: This repository is for archival and reproduction purposes only. 
+### Please refer to the following repositories for updated code and documentation:
+
+[libShapeDescriptor](https://github.com/bartvbl/libShapeDescriptor)
+
+
+[Clutterbox](https://github.com/bartvbl/Clutterbox)
+
+-----
+
 This repository contains:
 
 - A reference implementation of the Quick Intersection Count Change Image (along with the other tested descriptors in the paper's evaluation)
