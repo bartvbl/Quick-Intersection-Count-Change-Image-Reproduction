@@ -29,7 +29,7 @@ def downloadDatasetsMenu():
         if choice == 0 or choice == 1:
             if not os.path.isfile('input/download/SHREC17.7z') or ask_for_confirmation('It appears the SHREC 2017 dataset has already been downloaded. Would you like to download it again?'):
                 print('Downloading SHREC 2017 dataset..')
-                run_command_line_command('wget --output-document SHREC17.7z https://data.mendeley.com/datasets/ysh8p862v2/1/files/607f79cd-74c9-4bfc-9bf1-6d75527ae516/SHREC17.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document SHREC17.7z https://data.mendeley.com/public-files/datasets/ysh8p862v2/files/607f79cd-74c9-4bfc-9bf1-6d75527ae516/file_downloaded', 'input/download/')
             print()
             os.makedirs('input/SHREC17', exist_ok=True)
             run_command_line_command('p7zip -k -d download/SHREC17.7z', 'input/')
@@ -39,21 +39,21 @@ def downloadDatasetsMenu():
         if choice == 0 or choice == 2:
             if not os.path.isfile('input/download/results_computed_by_authors.7z') or ask_for_confirmation('It appears the results archive file has already been downloaded. Would you like to download it again?'):
                 print('Downloading results archive file..')
-                run_command_line_command('wget --output-document results_computed_by_authors.7z https://data.mendeley.com/datasets/p7g8fz82rk/1/files/29a722cc-b7b5-456a-a096-5d8ac55d6881/results_computed_by_authors.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document results_computed_by_authors.7z https://data.mendeley.com/public-files/datasets/p7g8fz82rk/files/29a722cc-b7b5-456a-a096-5d8ac55d6881/file_downloaded', 'input/download/')
             print()
             run_command_line_command('p7zip -k -d download/results_computed_by_authors.7z', 'input/')
 
             print()
             if not os.path.isfile('input/download/results_computed_by_authors_quicci_fpfh.7z') or ask_for_confirmation('It appears the second results archive file has already been downloaded. Would you like to download it again?'):
                 print('Downloading results archive file..')
-                run_command_line_command('wget --output-document results_computed_by_authors_quicci_fpfh.7z https://data.mendeley.com/datasets/k9j5ymry29/1/files/519b9cab-71a7-40fa-924e-10cf9b7905d7/results_computed_by_authors_quicci_and_fpfh.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document results_computed_by_authors_quicci_fpfh.7z https://data.mendeley.com/public-files/datasets/k9j5ymry29/files/519b9cab-71a7-40fa-924e-10cf9b7905d7/file_downloaded', 'input/download/')
             print()
             run_command_line_command('p7zip -k -d download/results_computed_by_authors_quicci_fpfh.7z', 'input/')
 
             print()
             if not os.path.isfile('input/download/clutter_estimated_by_authors.7z') or ask_for_confirmation('It appears the clutter estimates file has already been downloaded. Would you like to download it again?'):
                 print('Downloading clutter estimates file..')
-                run_command_line_command('wget --output-document clutter_estimated_by_authors.7z https://data.mendeley.com/datasets/p7g8fz82rk/1/files/37d353c5-7fd4-4488-a94a-97bb58dc722d/clutter_estimated_by_authors.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document clutter_estimated_by_authors.7z https://data.mendeley.com/public-files/datasets/p7g8fz82rk/files/37d353c5-7fd4-4488-a94a-97bb58dc722d/file_downloaded', 'input/download/')
             print()
             run_command_line_command('p7zip -k -d download/clutter_estimated_by_authors.7z', 'input/')
 
@@ -67,7 +67,7 @@ def downloadDatasetsMenu():
         if choice == 0 or choice == 3:
             if not os.path.isfile('input/download/distances_computed_by_authors.7z') or ask_for_confirmation('It appears the computed distances archive file has already been downloaded. Would you like to download it again?'):
                 print('Downloading distance function distances computed by authors..')
-                run_command_line_command('wget --output-document distances_computed_by_authors.7z https://data.mendeley.com/datasets/k9j5ymry29/2/files/b3fe4f65-bf36-4fa7-9d26-217a59e35e54/distances_computed_by_authors.7z?dl=1', 'input/download/')
+                run_command_line_command('wget --output-document distances_computed_by_authors.7z https://data.mendeley.com/public-files/datasets/k9j5ymry29/files/b3fe4f65-bf36-4fa7-9d26-217a59e35e54/file_downloaded', 'input/download/')
             print()
             os.makedirs('input/SHREC17', exist_ok=True)
             run_command_line_command('p7zip -k -d download/distances_computed_by_authors.7z', 'input/')
