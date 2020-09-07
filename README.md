@@ -10,6 +10,8 @@
 
 [Clutterbox](https://github.com/bartvbl/Clutterbox)
 
+[Hamming Tree](https://github.com/bartvbl/Hamming-Tree)
+
 -----
 
 This repository contains:
